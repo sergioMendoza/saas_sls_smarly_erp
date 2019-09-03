@@ -1,0 +1,20 @@
+{
+  "name": "token-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^3.1.0",
+    "aws-sdk": "^2.522.0",
+    "format": "^0.2.2",
+    "jwt-decode": "^2.2.0",
+    "request": "^2.88.0",
+    "typescript": "^3.6.2",
+    "winston": "^3.2.1"
+  }
+}
