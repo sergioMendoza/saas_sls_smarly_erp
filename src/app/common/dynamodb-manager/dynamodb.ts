@@ -23,7 +23,7 @@ export default class DynamoDBManager {
     tableDefinition;
     private _tableExists: boolean;
     constructor(tableDefinition, credentials, configSettings, callback) {
-        this.tableDefinition;
+        this.tableDefinition = tableDefinition;
         this._tableExists = false;
     }
     
