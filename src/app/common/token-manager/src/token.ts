@@ -3,7 +3,7 @@ import * as request from 'request';
 import * as async from 'async';
 import * as AWS from 'aws-sdk';
 
-import * as configModule from '../config-manager/config';
+import * as configModule from '../config-manager/src/confignfig';
 import colorize from 'format';
 const configuration = configModule.configure(process.env.NODE_ENV);
 
