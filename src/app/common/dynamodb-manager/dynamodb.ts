@@ -1,7 +1,7 @@
 import * as AWS from 'aws-sdk';
 
 import * as configModule from '../config-manager/config';
-import colorize from '../../token-manager/src/node_modules/format';
+import colorize from 'format';
 const configuration = configModule.configure(process.env.NODE_ENV);
 
 import * as winston from 'winston';
