@@ -1,0 +1,38 @@
+service:
+  name: sls-saas-system
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${opt:stage, 'dev'}
+  profile: default
+  region: 'us-east-1'
+  apiKeys:
+    - mySecretAPIKey
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'lambda:InvoqueFunction'
+      Resource: '*'
+
+custom:
+  packageExternal:
+    external:
+      - '../common'
+
+enviroment:
+  SERVICE_NAME: ${self:service}
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          method: get
+          path: hello
+    authorizer: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sls-saas-custom-authorizer-authorizer-${opt:stage, 'dev'}
