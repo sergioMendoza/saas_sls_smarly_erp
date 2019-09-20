@@ -5,7 +5,7 @@ import * as AWS from 'aws-sdk';
 
 import * as configModule from '../config-manager/config';
 import colorize from 'format';
-const configuration = configModule.configure(process.env.NODE_ENV);
+const configuration = configModule.configure(process.env.ENV);
 
 import * as winston from 'winston';
 

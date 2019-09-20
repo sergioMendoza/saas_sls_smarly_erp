@@ -5,28 +5,51 @@ service:
 plugins:
   - serverless-webpack
   - serverless-offline
+  - serverless-stage-manager
+  # - serverless-domain-manager 
+  - serverless-package-external
+  - serverless-pseudo-parameters
+
+custom:
+  relativePathToCommon: "../common"
+  packageExternal:
+    external:
+      - ${self:custom.relativePathToCommon}
+  stages:
+    - dev
+    - staging
+    - prod
+
+  env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
+  prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
+  # customDomain:
+    # domainName: <registered_domain_name>
+    # basePath: ''
+    # stage: ${self:provider.stage}
+    # createRoute53Record: true
 
 provider:
   name: aws
   runtime: nodejs8.10
   stage: ${opt:stage, 'dev'}
   profile: default
-  region: 'us-east-1'
+  region: ${opt:region, 'us-east-1'}
   apiKeys:
-    - mySecretAPIKey
+    - systemApiKey
   iamRoleStatements:
-    - Effect: 'Allow'
+    - Effect: "Allow"
       Action:
-        - 'lambda:InvoqueFunction'
-      Resource: '*'
+        - "lambda:InvoqueFunction"
+      Resource: "*"
 
-custom:
-  packageExternal:
-    external:
-      - '../common'
-
-enviroment:
-  SERVICE_NAME: ${self:service}
+  environment:
+    SERVICE_URL: ${self:custom.env.serviceUrl.${self:provider.stage}}
+    REGION: ${self:provider.region}
+    SNS_ROLE_ARN: ${self:custom.prefix.arn.sns}:${self:custom.env.snsTopic.${self:provider.stage}}
+    AWS_ACCOUNT_ID: ${self:custom.env.accountId.${self:provider.stage}}
+    USER_TABLE: ${self:custom.env.user.${self:provider.stage}}
+    TENANT_TABLE: ${self:custom.env.tenant.${self:provider.stage}}
+    ENV: ${self:provider.stage}
 
 functions:
   hello:
@@ -35,4 +58,4 @@ functions:
       - http:
           method: get
           path: hello
-    authorizer: arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sls-saas-custom-authorizer-authorizer-${opt:stage, 'dev'}
+          authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}

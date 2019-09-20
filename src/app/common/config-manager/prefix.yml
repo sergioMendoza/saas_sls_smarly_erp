@@ -1,0 +1,17 @@
+arn:
+  lambda: arn:aws:lambda:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:function
+  table: arn:aws:dynamodb:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:table
+  bucket: 'arn:aws:s3:::'
+  sns: arn:aws:sns:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}
+  activity: arn:aws:states:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:activity
+  stateMachine: arn:aws:states:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:stateMachine
+  cluster: arn:aws:states:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:cluster
+  service: arn:aws:states:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:service
+  role: arn:aws:iam::${self:custom.env.accountId.${self:provider.stage}}:role
+  ssm: arn:aws:ssm:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:parameter/
+  ssmEnv: arn:aws:ssm:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:parameter/env/${self:provider.stage}/
+  batch: arn:aws:batch:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:/v1/
+  kms: arn:aws:kms:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:key/
+
+# All the resources manually named should start with this prefix
+naming: ${self:service}-${self:provider.stage} 

@@ -95,25 +95,23 @@ interface SaasConfig {
 
 import * as winston from 'winston';
 
-export const configure = (environment): SaasConfig => {
+export const configure = (environment: string | null | undefined): SaasConfig => {
     if (environment == null || environment == undefined || environment == 'undefined') {
-        let enviroment: string = process.env.NODE_ENV;
-        if (process.env.NODE_ENV == undefined) {
-            enviroment = 'development';
+        environment = process.env.ENV;
+        if (process.env.ENV == undefined) {
+            environment = 'dev';
         }
     }
     switch (environment) {
-        case 'production':
-            if (process.env.AWS_REGION == undefined ||
+        case 'prod':
+            if (process.env.REGION == undefined ||
                 process.env.SERVICE_URL == undefined ||
                 process.env.SNS_ROLE_ARN == undefined ||
                 process.env.AWS_ACCOUNT_ID == undefined ||
                 process.env.USER_TABLE == undefined ||
-                process.env.TENANT_TABLE == undefined ||
-                process.env.PRODUCT_TABLE == undefined ||
-                process.env.ORDER_TABLE == undefined) {
+                process.env.TENANT_TABLE == undefined) {
                 let error: string = `Production Environment Variables Not Properly Configured. \n
-                Please ensure AWS_REGION, SERVCE_URL, SNS_ROLE_ARN, AWS_ACCOUNT_ID environment Variables are set.`
+                Please ensure REGION, SERVCE_URL, SNS_ROLE_ARN, AWS_ACCOUNT_ID environment Variables are set.`
                 throw error;
                 break;
             } else {
@@ -124,8 +122,8 @@ export const configure = (environment): SaasConfig => {
                 let config: SaasConfig = {
                     environment: environment,
                     //web_client: process.env.WEB_CLIENT,
-                    aws_region: process.env.AWS_REGION,
-                    cognito_region: process.env.AWS_REGION,
+                    aws_region: process.env.REGION,
+                    cognito_region: process.env.REGION,
                     aws_account: process.env.AWS_ACCOUNT_ID,
                     domain: process.env.SERVICE_URL,
                     service_url: prod.protocol + process.env.SERVICE_URL,
@@ -154,7 +152,7 @@ export const configure = (environment): SaasConfig => {
             }
 
 
-        case "development":
+        case "dev":
             let port = dev.port;
             let name = dev.name;
             let table = dev.table;
