@@ -1,6 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import { Context, CustomAuthorizerEvent, Statement, PolicyDocument, AuthResponse } from 'aws-lambda';
-
+import {AuthResponse, Context, CustomAuthorizerEvent, PolicyDocument, Statement} from 'aws-lambda';
 
 
 export const decodeToken = (event: CustomAuthorizerEvent, context: Context): string | object | null => {
@@ -8,16 +7,15 @@ export const decodeToken = (event: CustomAuthorizerEvent, context: Context): str
     if (token) {
         token = token.substring(token.indexOf(' ') + 1);
     }
-    let decodedJwt: any = jwt.decode(token, { complete: true });
+    let decodedJwt: any = jwt.decode(token, {complete: true});
     if (!decodedJwt) {
         console.log('Not a valid JWT token');
         context.fail('Not a JWT Token');
         return;
-    }
-    else {
+    } else {
         return decodedJwt;
     }
-}
+};
 
 class AuthPolicy {
     awsAccountId: string;
@@ -66,6 +64,7 @@ class AuthPolicy {
             this.stage = apiOptions.stage;
         }
     }
+
     addMethod(effect, verb, resource, conditions) {
 
         if (verb != "*" && !AuthPolicy.HttpVerb.hasOwnProperty(verb)) {
@@ -76,11 +75,11 @@ class AuthPolicy {
             throw new Error("Invalid resource path: " + resource + ". Path should match " + this.pathRegex);
         }
 
-        var cleanedResource = resource;
+        let cleanedResource = resource;
         if (resource.substring(0, 1) == "/") {
             cleanedResource = resource.substring(1, resource.length);
         }
-        var resourceArn = "arn:aws:execute-api:" +
+        let resourceArn = "arn:aws:execute-api:" +
             this.region + ":" +
             this.awsAccountId + ":" +
             this.restApiId + "/" +
@@ -103,14 +102,11 @@ class AuthPolicy {
 
     static getEmptyStatement(effect: string): Statement {
         effect = effect.substring(0, 1).toUpperCase() + effect.substring(1, effect.length).toLowerCase();
-
-        let statement: Statement = {
+        return {
             Action: 'execute-api:Invoke',
             Effect: effect,
-            Resource: ['invoque']
+            Resource: ['invoke']
         };
-
-        return statement;
     }
 
     getStatementsForEffect(effect, methods): Statement[] {
@@ -144,6 +140,7 @@ class AuthPolicy {
     allowAllMethods() {
         this.addMethod("allow", "*", "*", null);
     }
+
     denyAllMethods() {
         this.addMethod("deny", "*", "*", null);
     }
@@ -172,21 +169,17 @@ class AuthPolicy {
         let doc: PolicyDocument = {
             Version: this.version,
             Statement: [],
-
-        }
+        };
         doc.Statement.concat(this.getStatementsForEffect("Allow", this.allowMethods));
         doc.Statement.concat(this.getStatementsForEffect("Deny", this.allowMethods));
 
-
-        let authPolicy: AuthResponse = {
+        // authPolicy
+        return {
             principalId: this.principalId,
             policyDocument: doc
         };
-
-        return authPolicy;
     }
 }
-
 
 
 interface ApiOptions {
@@ -202,15 +195,15 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
         token = token.substring(token.indexOf(' ') + 1);
     }
 
-    let decodedJwt: any = jwt.decode(token, { complete: true });
+    let decodedJwt: any = jwt.decode(token, {complete: true});
     let iss: string = decodedJwt.payload.iss;
 
     let n: number = iss.lastIndexOf('/');
     let resultUserPoolId: string = iss.substring(n + 1);
     console.log(iss);
     if (!decodedJwt) {
-        console.log('Not a valid JWT token')
-        context.fail('Not a valid JWT Token')
+        console.log('Not a valid JWT token');
+        context.fail('Not a valid JWT Token');
         return;
     }
 
@@ -230,14 +223,14 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
     }
 
     //Get the kid from the token and retrieve corresponding PEM
-    var kid: string = decodedJwt.header.kid;
-    var pem: string = pems[kid];
+    let kid: string = decodedJwt.header.kid;
+    let pem: string = pems[kid];
     if (!pem) {
         console.log('Invalid access token');
         context.fail("Invalid access token");
         return;
     }
-    jwt.verify(token, pem, { issuer: iss }, (err, payload) => {
+    jwt.verify(token, pem, {issuer: iss}, (err, payload) => {
         if (err) {
             context.fail('cannot verify signature');
         } else {
@@ -249,7 +242,7 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
                 region: tmp[3],
                 restApiId: apiGatewayArnTmp[0],
                 stage: apiGatewayArnTmp[1]
-            }
+            };
             /*
             let method: string = apiGatewayArnTmp[2];
             let resource = '/';
@@ -264,12 +257,12 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
             authResponse.context = {
                 tenant_id: decodedJwt.payload['custom:tenant_id'],
                 sub: decodedJwt.payload['sub'],
-                username:decodedJwt.payload['cognito:username'],
-                given_name:decodedJwt.payload['given_name'],
-                family_name:decodedJwt.payload['family_name'],
-                role:decodedJwt.payload['custom:role'],
+                username: decodedJwt.payload['cognito:username'],
+                given_name: decodedJwt.payload['given_name'],
+                family_name: decodedJwt.payload['family_name'],
+                role: decodedJwt.payload['custom:role'],
                 userPoolId: resultUserPoolId
-            }
+            };
 
             context.succeed(authResponse)
 
@@ -277,5 +270,4 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
     });
 
 
-
-}
+};
