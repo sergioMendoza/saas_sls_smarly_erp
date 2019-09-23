@@ -4,10 +4,9 @@ import * as async from 'async';
 import * as AWS from 'aws-sdk';
 
 import * as configModule from '../config-manager/config';
-import colorize from 'format';
-const configuration = configModule.configure(process.env.ENV);
-
 import * as winston from 'winston';
+
+const configuration = configModule.configure(process.env.ENV);
 
 winston.configure({
     level: configuration.loglevel,
@@ -15,14 +14,14 @@ winston.configure({
         new winston.transports.Console({
             level: configuration.loglevel,
             format: winston.format.combine(
-                winston.format.colorize({ all: true }),
+                winston.format.colorize({all: true}),
                 winston.format.simple()
             )
         })
     ]
-})
+});
 
-var tokenCache = {};
+let tokenCache = {};
 
 export const getTokenId = (req): string => {
     let tenantId = '';
@@ -34,7 +33,8 @@ export const getTokenId = (req): string => {
             tenantId = decodedIdToken['custom:tenant_id'];
     }
     return tenantId;
-}
+};
+
 export const getUserRole = (req, callback) => {
     let bearerToken = req.get('Authorization');
     if (bearerToken) {
@@ -43,9 +43,9 @@ export const getUserRole = (req, callback) => {
         if (decodedIdToken)
             callback(decodedIdToken['custom:role']);
         else
-            callback('unkown');
+            callback('unknown');
     }
-}
+};
 
 export const getUserFullName = (idToken) => {
     let userFullName: string | object = '';
@@ -55,7 +55,7 @@ export const getUserFullName = (idToken) => {
             userFullName = {firstName: decodedIdToken.given_name, lastName: decodedIdToken.family_name};
     }
     return userFullName;
-}
+};
 
 export const getRequestAuthToken = (req): string => {
     let authToken = '';
@@ -63,9 +63,9 @@ export const getRequestAuthToken = (req): string => {
     if (authHeader)
         authToken = authHeader.substring(authHeader.indexOf(' ') + 1);
     return authToken;
-}
+};
 
-export const decodeToken = function(bearerToken) {
+export const decodeToken = function (bearerToken) {
     let resultToken = {};
     if (bearerToken) {
         let decodedIdToken = jwtDecode(bearerToken);
@@ -73,19 +73,19 @@ export const decodeToken = function(bearerToken) {
             resultToken = decodedIdToken;
     }
     return resultToken;
-}
+};
 
-export const checkRole = function(bearerToken) {
+export const checkRole = function (bearerToken) {
     let resultToken = {};
     if (bearerToken) {
         let decodedIdToken = jwtDecode(bearerToken);
         if (decodedIdToken)
-            let resultToken = decodedIdToken['custom:role'];
+            resultToken = decodedIdToken['custom:role'];
     }
     return resultToken;
-}
+};
 
-export const decodeOpenID = function(bearerToken) {
+export const decodeOpenID = function (bearerToken) {
     let resultToken = {};
     if (bearerToken) {
         let decodedIdToken = jwtDecode(bearerToken);
@@ -93,7 +93,7 @@ export const decodeOpenID = function(bearerToken) {
             resultToken = decodedIdToken;
     }
     return resultToken;
-}
+};
 
 export const getCredentialsFromToken = (req, updateCredentials) => {
     let bearerToken = req.get('Authorization');
@@ -111,16 +111,14 @@ export const getCredentialsFromToken = (req, updateCredentials) => {
                 }
             ], (error, results) => {
                 if (error) {
-                    winston.error('Error fetching credentials for user')
+                    winston.error('Error fetching credentials for user');
                     updateCredentials(null);
-                }
-                else {
+                } else {
                     tokenCache[tokenValue] = results;
                     updateCredentials(results);
                 }
             });
-        }
-        else if (tokenValue in tokenCache) {
+        } else if (tokenValue in tokenCache) {
             winston.debug('Getting credentials from cache');
             updateCredentials(tokenCache[tokenValue]);
         }
@@ -130,7 +128,7 @@ export const getCredentialsFromToken = (req, updateCredentials) => {
 export const getUserPool = (userName, callback) => {
     // Create URL for user-manager request
     // let userURL = userURL + '/system/' + userName;
-    let userURL   = configuration.url.user + '/pool/' + userName;
+    let userURL = configuration.url.user + '/pool/' + userName;
     request({
         url: userURL,
         method: "GET",
@@ -141,22 +139,20 @@ export const getUserPool = (userName, callback) => {
     }, (error, response, body) => {
         if (!error && response.statusCode === 200) {
             callback(null, body);
-        }
-        else {
+        } else {
             if (!error) {
                 let lookupError = new Error("Failed looking up user pool: " + response.body.Error);
                 callback(lookupError, response);
-            }
-            else {
+            } else {
                 callback(error, response)
             }
         }
     });
-}
+};
 
 export const getUserPoolWithParams = (userName, callback) => {
 
-    let userURL   = configuration.url.user + '/pool/' + userName;
+    let userURL = configuration.url.user + '/pool/' + userName;
     // fire the request
     request({
         url: userURL,
@@ -168,17 +164,16 @@ export const getUserPoolWithParams = (userName, callback) => {
     }, (error, response, body) => {
         if (!error && response.statusCode === 200) {
             callback(null, body);
-        }
-        else {
+        } else {
             callback(null, "Error loading user: " + error);
         }
     });
-}
+};
 
 export const getInfra = (input, callback) => {
     // Create URL for user-manager request
     // let userURL = userURL + '/system/' + userName;
-    let tenantsUrl   = configuration.url.tenant + 's/system/';
+    let tenantsUrl = configuration.url.tenant + 's/system/';
     console.log(tenantsUrl);
     request({
         url: tenantsUrl,
@@ -190,18 +185,16 @@ export const getInfra = (input, callback) => {
     }, (error, response, body) => {
         if (!error && response.statusCode === 200) {
             callback(null, body);
-        }
-        else {
+        } else {
             if (!error) {
                 let lookupError = new Error("Failed looking up infra: " + response.body.Error);
                 callback(lookupError, response);
-            }
-            else {
+            } else {
                 callback(error, response)
             }
         }
     });
-}
+};
 
 export const fireRequest = (event, callback) => {
 
@@ -221,14 +214,13 @@ export const fireRequest = (event, callback) => {
     }, (error, response, body) => {
         if (!error && response.statusCode === 200) {
             callback(body);
-        }
-        else {
+        } else {
             callback(null, 'Error making request. \nError: ' + error);
         }
     });
 };
 
-export const authenticateUserInPool =(userPool, idToken, callback) => {
+export const authenticateUserInPool = (userPool, idToken, callback) => {
     let decodedIdToken = jwtDecode(idToken);
     let provider = decodedIdToken.iss;
     provider = provider.replace('https://', '');
@@ -236,36 +228,32 @@ export const authenticateUserInPool =(userPool, idToken, callback) => {
         token: idToken,
         provider: provider,
         IdentityPoolId: userPool.IdentityPoolId
-    }
+    };
     let getIdentity = getId(params, (ret, data) => {
         if (ret) {
             let params = {
                 token: idToken,
                 IdentityId: ret.IdentityId,
                 provider: provider
-            }
+            };
             let returnedIdentity = ret;
             let getCredentials = getCredentialsForIdentity(params, (ret, data) => {
                 if (ret) {
-                    let returnedCredentials = ret;
-
                     // put claim and user full name into one response
-                    callback(null, {"claim": returnedCredentials.Credentials});
-                }
-                else {
+                    callback(null, {"claim": ret.Credentials});
+                } else {
                     winston.error('ret');
                 }
             })
-        }
-        else {
+        } else {
             winston.error('ret');
         }
     })
-}
+};
 
 export const getCredentialsForIdentity = (event, callback) => {
-    var cognitoidentity = new AWS.CognitoIdentity({apiVersion: '2014-06-30',region: configuration.aws_region});
-    var params = {
+    let cognitoIdentity = new AWS.CognitoIdentity({apiVersion: '2014-06-30', region: configuration.aws_region});
+    let params = {
         IdentityId: event.IdentityId, /* required */
         //CustomRoleArn: 'STRING_VALUE',
         Logins: {
@@ -273,20 +261,19 @@ export const getCredentialsForIdentity = (event, callback) => {
             /* '<IdentityProviderName>': ... */
         }
     };
-    cognitoidentity.getCredentialsForIdentity(params, (err, data) => {
+    cognitoIdentity.getCredentialsForIdentity(params, (err, data) => {
         if (err) {
             winston.debug(err.message, err.stack);
             callback(err);
-        }
-        else {
+        } else {
             callback(data);
         }
     });
 };
 
-export const getId (event, callback) => {
-    var cognitoidentity = new AWS.CognitoIdentity({apiVersion: '2014-06-30',region: configuration.aws_region});
-    var params = {
+export const getId = (event, callback) => {
+    let cognitoIdentity = new AWS.CognitoIdentity({apiVersion: '2014-06-30', region: configuration.aws_region});
+    let params = {
         IdentityPoolId: event.IdentityPoolId, /* required */
         AccountId: configuration.aws_account,
         Logins: {
@@ -294,34 +281,33 @@ export const getId (event, callback) => {
             /* '<IdentityProviderName>': ... */
         }
     };
-    cognitoidentity.getId(params, (err, data) => {
+    cognitoIdentity.getId(params, (err, data) => {
         if (err) {
             winston.debug(err.message, err.stack);
             callback(err);
-        }
-        else {
+        } else {
             callback(data);
         }
     });
 };
 
 export const getSystemCredentials = (callback) => {
-    var sysCreds: any = '';
-    var sysConfig = new AWS.Config();
+    let sysCredentials: any = '';
+    let sysConfig = new AWS.Config();
     sysConfig.getCredentials((err) => {
-        if (err) {
-            callback(err.stack);
-            winston.debug('Unable to Obtain Credentials');
-        } // credentials not loaded
-        else{
-            let tempCreds = sysConfig.credentials;
-            if(tempCreds != null){
-                sysCreds = tempCreds;
-            }
-            let credentials = {"claim": sysCreds};
-            callback(credentials);
+            if (err) {
+                callback(err.stack);
+                winston.debug('Unable to Obtain Credentials');
+            } // credentials not loaded
+            else {
+                let tempCredentials = sysConfig.credentials;
+                if (tempCredentials != null) {
+                    sysCredentials = tempCredentials;
+                }
+                let credentials = {"claim": sysCredentials};
+                callback(credentials);
             }
 
         }
     );
-}
+};

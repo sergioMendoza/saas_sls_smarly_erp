@@ -1,4 +1,5 @@
 import * as config from 'config';
+import * as winston from 'winston';
 
 export interface SaasEnvironmentConfig {
     protocol: string;
@@ -39,12 +40,6 @@ export interface SaasEnvironmentConfig {
         level: string
     }
 }
-
-
-const prod: SaasEnvironmentConfig = config.get('Config.prod');
-
-
-const dev: SaasEnvironmentConfig = config.get('Config.dev');
 
 interface SaasConfig {
     environment: string;
@@ -93,10 +88,12 @@ interface SaasConfig {
     };
 }
 
-import * as winston from 'winston';
+const prod: SaasEnvironmentConfig = config.get('Config.prod');
+
+const dev: SaasEnvironmentConfig = config.get('Config.dev');
 
 export const configure = (environment: string | null | undefined): SaasConfig => {
-    if (environment == null || environment == undefined || environment == 'undefined') {
+    if (environment === null || environment === undefined || environment === 'undefined') {
         environment = process.env.ENV;
         if (process.env.ENV == undefined) {
             environment = 'dev';
@@ -110,16 +107,14 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                 process.env.AWS_ACCOUNT_ID == undefined ||
                 process.env.USER_TABLE == undefined ||
                 process.env.TENANT_TABLE == undefined) {
-                let error: string = `Production Environment Variables Not Properly Configured. \n
-                Please ensure REGION, SERVCE_URL, SNS_ROLE_ARN, AWS_ACCOUNT_ID environment Variables are set.`
-                throw error;
-                break;
+                throw `Production Environment Variables Not Properly Configured. \n
+                Please ensure REGION, SERVCE_URL, SNS_ROLE_ARN, AWS_ACCOUNT_ID environment Variables are set.`;
             } else {
-                winston.debug('Currently Running in', + environment);
+                winston.debug('Currently Running in', +environment);
                 let port = prod.port;
                 let name = prod.name;
                 //var table = prod.table;
-                let config: SaasConfig = {
+                return {
                     environment: environment,
                     //web_client: process.env.WEB_CLIENT,
                     aws_region: process.env.REGION,
@@ -146,9 +141,7 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                         auth: prod.protocol + process.env.SERVICE_URL + '/auth',
                         sys: prod.protocol + process.env.SERVICE_URL + '/sys'
                     }
-                }
-                return config;
-                break;
+                };
             }
 
 
@@ -157,7 +150,7 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
             let name = dev.name;
             let table = dev.table;
 
-            let config: SaasConfig = {
+            return {
                 environment: environment,
                 aws_region: dev.region,
                 cognito_region: dev.region,
@@ -178,15 +171,11 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                     auth: dev.protocol + dev.domain + ':' + port.auth + '/auth',
                     sys: dev.protocol + dev.domain + ':' + port.sys + '/sys',
                 }
-            }
-
-            return config;
-            break;
+            };
 
         default:
-            let error = `No Environment Configured. \n 
+            throw `No Environment Configured. \n 
             Option 1: Please configure Environment Variable. \n 
             Option 2: Manually override environment in config function.`;
-            throw error;
     }
-}
+};

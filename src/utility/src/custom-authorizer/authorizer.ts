@@ -105,7 +105,7 @@ class AuthPolicy {
         return {
             Action: 'execute-api:Invoke',
             Effect: effect,
-            Resource: ['invoke']
+            Resource: []
         };
     }
 
