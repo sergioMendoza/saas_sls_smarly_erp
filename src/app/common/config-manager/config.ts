@@ -41,7 +41,7 @@ export interface SaasEnvironmentConfig {
     }
 }
 
-interface SaasConfig {
+export interface SaasConfig {
     environment: string;
     aws_region: string;
     cognito_region: string;
@@ -114,7 +114,7 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                 let port = prod.port;
                 let name = prod.name;
                 //var table = prod.table;
-                return {
+                let conf:  SaasConfig = {
                     environment: environment,
                     //web_client: process.env.WEB_CLIENT,
                     aws_region: process.env.REGION,
@@ -142,6 +142,8 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                         sys: prod.protocol + process.env.SERVICE_URL + '/sys'
                     }
                 };
+                return conf
+
             }
 
 
@@ -150,7 +152,7 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
             let name = dev.name;
             let table = dev.table;
 
-            return {
+            let conf: SaasConfig = {
                 environment: environment,
                 aws_region: dev.region,
                 cognito_region: dev.region,
@@ -172,6 +174,7 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                     sys: dev.protocol + dev.domain + ':' + port.sys + '/sys',
                 }
             };
+            return conf; 
 
         default:
             throw `No Environment Configured. \n 

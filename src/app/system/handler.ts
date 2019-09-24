@@ -1,7 +1,87 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
-// import * as bodyParser from 'body-parser';
-// import * as uuidV4 from 'uuid/v4';
-// import * as configModule from '../common/config-manager/config';
+import { APIGatewayProxyHandler, Handler, APIGatewayProxyResult } from 'aws-lambda';
+import * as bodyParser from 'body-parser';
+import * as uuidV4 from 'uuid/v4';
+import * as configModule from '../common/config-manager/config';
+import * as winston from 'winston';
+import * as request from 'request';
+import { TenantAdminManager, Tenant } from './manager';
+
+
+const configuration: configModule.SaasConfig = configModule.configure(process.env.ENV);
+
+const tenantUrl: string = configuration.url.tenant;
+
+const userUrl: string = configuration.url.user;
+
+winston.configure({
+  level: configuration.loglevel,
+  transports: [
+    new winston.transports.Console({
+      level: configuration.loglevel,
+      format: winston.format.combine(
+        winston.format.colorize({ all: true }),
+        winston.format.simple()
+      )
+    })
+  ]
+});
+
+
+export const systemAdmin: Handler = async (event, _context) => {
+  let tenant: Tenant = JSON.parse(event.body);
+  const headers = { "Access-Control-Allow-Origin": "*" };
+  // Generate the tenant id for the system user
+  tenant.id = 'SYSADMIN' + uuidV4();
+  winston.debug('Creating system admin user, tenant id: ' + tenant.id);
+  tenant.id = tenant.id.split('-').join('');
+  TenantAdminManager.exists(tenant, configuration, (tenantExists) => {
+    winston.error("Error registering new system admin user");
+    if (tenantExists) {
+      winston.error("Error registering new system admin user");
+      return {
+        statusCode: 400,
+        headers: headers,
+        body: JSON.stringify({
+          message: { error: "Error registering new system admin user" }
+        })
+      };
+    } else {
+      TenantAdminManager.reg(tenant, configuration)
+        .then((tenData) => {
+          tenant.UserPoolId = tenData.pool.UserPool.Id;
+          tenant.IdentityPoolId = tenData.identityPool.IdentityPoolId;
+
+          tenant.systemAdminRole = tenData.role.systemAdminRole;
+          tenant.systemSupportRole = tenData.role.systemSupportRole;
+          tenant.trustRole = tenData.role.trustRole;
+
+          tenant.systemAdminPolicy = tenData.policy.systemAdminPolicy;
+          tenant.systemSupportPolicy = tenData.policy.systemSupportPolicy;
+
+          TenantAdminManager.saveTenantData(tenant, configuration)
+        }).then(() => {
+
+          winston.debug("System admin user registered: " + tenant.id);
+          return {
+            statusCode: 201,
+            headers: headers,
+            body: JSON.stringify({
+              message: { message: "System admin user " + tenant.id + " registered" }
+            })
+          };
+        }).catch((error) => {
+          winston.error("Error registering new system admin user: " + error.message);
+          return {
+            statusCode: 400,
+            headers: headers,
+            body: JSON.stringify({
+              error: "Error registering system admin user: " + error.message
+            })
+          };
+        })
+    }
+  });
+}
 
 export const hello: APIGatewayProxyHandler = async (event, _context) => {
   return {

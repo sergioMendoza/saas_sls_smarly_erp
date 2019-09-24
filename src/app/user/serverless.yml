@@ -1,5 +1,5 @@
 service:
-  name: sls-saas-system
+  name: sls-saas-user
 
 # Add the serverless-webpack plugin
 plugins:
@@ -65,12 +65,16 @@ provider:
     TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
 
 functions:
-  hello:
-    handler: handler.hello
+  getUserPool:
+    handler: handler.getUserPool
     events:
       - http:
           method: get
-          path: hello
+          path: user/pool/{id}
+          request:
+            parameters:
+              paths:
+                id: true
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
 
 # create our resources with separate cloudFormation Templates
