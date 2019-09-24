@@ -1,4 +1,4 @@
-import {APIGatewayProxyHandler, CustomAuthorizerHandler, CustomAuthorizerEvent, Callback, Context} from 'aws-lambda';
+import {APIGatewayProxyHandler, Callback, Context, CustomAuthorizerEvent, CustomAuthorizerHandler} from 'aws-lambda';
 import {decodeToken, ValidateToken} from './authorizer';
 import * as request from 'request';
 import jwkToPem, {Jwk} from 'jwk-to-pem';
@@ -58,9 +58,8 @@ export const authorizer: CustomAuthorizerHandler = (event: CustomAuthorizerEvent
                     const modulus: string = keys[i].n;
                     const exponent: string = keys[i].e;
                     const key_type: 'RSA' = keys[i].kty;
-                    const jwk: Jwk = {kty: key_type, n: modulus, e: exponent}
-                    const pem = jwkToPem(jwk);
-                    pems[key_id] = pem;
+                    const jwk: Jwk = {kty: key_type, n: modulus, e: exponent};
+                    pems[key_id] = jwkToPem(jwk);
                 }
 
                 ValidateToken(pems, event, context)
