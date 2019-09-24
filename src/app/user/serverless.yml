@@ -1,0 +1,91 @@
+service:
+  name: sls-saas-user
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-stage-manager
+  # - serverless-domain-manager
+  - serverless-package-external
+  - serverless-pseudo-parameters
+
+custom:
+  PROJECT_NAME: "sls-saas"
+  relativePathToCommon: "../common"
+  packageExternal:
+    external:
+      - ${self:custom.relativePathToCommon}
+  stages:
+    - dev
+    - staging
+    - prod
+
+  env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
+  prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
+    # customDomain:
+    # domainName: <registered_domain_name>
+    # basePath: ''
+    # stage: ${self:provider.stage}
+  # createRoute53Record: true
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${opt:stage, 'dev'}
+  profile: default
+  region: ${opt:region, 'us-east-1'}
+  apiKeys:
+    - systemApiKey
+  iamRoleStatements:
+    # allow lambda invocation and request
+    - Effect: "Allow"
+      Action:
+        - "lambda:InvoqueFunction"
+      Resource: "*"
+    # allow accessto dynamodb base tenant 
+    - Effect: "Allow"
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "${self:custom.prefix.arn.table}/*"
+
+  environment:
+    PROJECT_NAME: ${self:custom.PROJECT_NAME}
+    SERVICE_URL: ${self:custom.env.serviceUrl.${self:provider.stage}}
+    REGION: ${self:provider.region}
+    SNS_ROLE_ARN: ${self:custom.prefix.arn.sns}:${self:custom.env.snsTopic.${self:provider.stage}}
+    ENV: ${self:provider.stage}
+    USER_TABLE: ${self:custom.env.table.user.${self:provider.stage}}
+    TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
+
+functions:
+  getUserPool:
+    handler: handler.getUserPool
+    events:
+      - http:
+          method: get
+          path: user/pool/{id}
+          request:
+            parameters:
+              paths:
+                id: true
+          authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+
+# create our resources with separate cloudFormation Templates
+resources:
+  
+  # User Table
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/dynamodb-user.yml)}
+
+  # Tenant Table
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/dynamodb-tenant.yml)}
+
+  # API Gateway Errors and CORS
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}
+
