@@ -23,8 +23,8 @@ export default {
         "sys": "System Registration Manager"
       },
       "table": {
-        "user": "User",
-        "tenant": "Tenant"
+        "user": "sls-saas-dev-user",
+        "tenant": "sls-saas-dev-tenant"
       },
       "userRole": {
         "systemAdmin": "SystemAdmin",
@@ -58,8 +58,8 @@ export default {
         "sys": "System Registration Manager"
       },
       "table": {
-        "user": "User",
-        "tenant": "Tenant"
+        "user": "sls-saas-prod-user",
+        "tenant": "sls-saas-prod-tenant"
       },
       "userRole": {
         "systemAdmin": "SystemAdmin",
