@@ -8,11 +8,7 @@ import DynamoDBManager from '../common/dynamodb-manager/dynamodb';
 import * as winston from 'winston';
 // import * as request from 'request';
 
-
 const configuration: configModule.SaasConfig = configModule.configure(process.env.ENV);
-
-
-
 winston.configure({
     level: configuration.loglevel,
     transports: [
@@ -93,17 +89,17 @@ export const createTenant: Handler = (event, _context) => {
 export const ListTenantSystem: Handler = (_event, _context) => {
   winston.debug('Fetching all tenants required to clean up infrastructure');
 //Note: Reference Architecture not leveraging Client Certificate to secure system only endpoints. Please integrate the following endpoint with a Client Certificate.
-  var credentials = {};
+  let credentials = {};
   tokenManager.getSystemCredentials(function (systemCredentials) {
       credentials = systemCredentials;
-      var scanParams = {
+      let scanParams = {
           TableName: tenantSchema.TableName,
-      }
+      };
       const headers = { "Access-Control-Allow-Origin": "*" };
 
 
       // construct the helper object
-      var dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
+      let dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
 
       dynamoManager.scan(scanParams, credentials, (error, tenants) => {
           if (error) {

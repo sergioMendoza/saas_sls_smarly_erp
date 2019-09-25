@@ -25,7 +25,7 @@ custom:
   prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
     # customDomain:
     # domainName: <registered_domain_name>
-    # basePath: ''
+    # basePath: 'user'
     # stage: ${self:provider.stage}
   # createRoute53Record: true
 
@@ -70,7 +70,7 @@ functions:
     events:
       - http:
           method: get
-          path: user/pool/{id}
+          path: pool/{id}
           request:
             parameters:
               paths:
@@ -81,24 +81,11 @@ functions:
     events:
       - http:
           method: post
-          path: user/system
+          path: system
 
   delUserTenants:
     handler: handler.delUserTenants
     events:
       - http:
           method: delete
-          path: user/tenants
-
-# create our resources with separate cloudFormation Templates
-resources:
-  
-  # User Table
-  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/dynamodb-user.yml)}
-
-  # Tenant Table
-  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/dynamodb-tenant.yml)}
-
-  # API Gateway Errors and CORS
-  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}
-
+          path: tenants
