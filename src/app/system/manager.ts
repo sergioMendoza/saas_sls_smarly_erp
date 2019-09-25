@@ -98,7 +98,7 @@ export class TenantAdminManager {
 
     static async saveTenantData(tenant: Tenant, configuration: SaasConfig): Promise<any> {
         let tenantURL: string = configuration.url.tenant;
-        let promise = new Promise(function (resolve, reject) {
+        let promise = new Promise( (resolve, reject) => {
             // init the tenant sace request
 
             var tenantRequestData = {

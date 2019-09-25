@@ -1,17 +1,17 @@
-import { APIGatewayProxyHandler, Handler, APIGatewayProxyResult } from 'aws-lambda';
-import * as bodyParser from 'body-parser';
+import { APIGatewayProxyHandler, Handler } from 'aws-lambda';
+// import * as bodyParser from 'body-parser';
 import * as uuidV4 from 'uuid/v4';
 import * as configModule from '../common/config-manager/config';
 import * as winston from 'winston';
-import * as request from 'request';
+// import * as request from 'request';
 import { TenantAdminManager, Tenant } from './manager';
 
 
 const configuration: configModule.SaasConfig = configModule.configure(process.env.ENV);
 
-const tenantUrl: string = configuration.url.tenant;
+// const tenantUrl: string = configuration.url.tenant;
 
-const userUrl: string = configuration.url.user;
+// const userUrl: string = configuration.url.user;
 
 winston.configure({
   level: configuration.loglevel,
@@ -27,7 +27,10 @@ winston.configure({
 });
 
 
-export const systemAdmin: Handler = async (event, _context) => {
+/**
+ * Register a new system admin user
+ */
+export const regSystemAdmin: Handler = async (event, _context) => {
   let tenant: Tenant = JSON.parse(event.body);
   const headers = { "Access-Control-Allow-Origin": "*" };
   // Generate the tenant id for the system user
@@ -82,6 +85,41 @@ export const systemAdmin: Handler = async (event, _context) => {
     }
   });
 }
+
+/**
+ * Delete all system infrastructure and tables.
+ */
+export const delSystemAdmin: Handler = (_event, _context) => {
+  const headers = { "Access-Control-Allow-Origin": "*" };
+  TenantAdminManager.deleteInfra(configuration, winston)
+  .then( () => {
+      winston.debug("Delete Infra");
+      //CloudFormation will remove the tables. This can be uncommented if required.
+      //deleteTables()
+  })
+  .then( () => {
+      winston.debug("System Infrastructure & Tables removed");
+     
+      return {
+        statusCode: 200,
+        headers: headers,
+        body: JSON.stringify({
+          message: "System Infrastructure & Tables removed"
+        })
+      };
+  })
+  .catch((_error) => {
+      winston.error("Error removing system");
+      return {
+        statusCode: 400,
+        headers: headers,
+        body: JSON.stringify({
+          error: " Error removing system"
+        })
+      };
+  });
+}
+
 
 export const hello: APIGatewayProxyHandler = async (event, _context) => {
   return {

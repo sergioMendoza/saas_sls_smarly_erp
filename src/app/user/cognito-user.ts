@@ -31,10 +31,10 @@ winston.configure({
  */
 export const createUser = (credentials, user, callback) => {
     // init service provider
-    var cognitoidentityserviceprovider = initCognitoServiceProvider(credentials);
+    let cognitoidentityserviceprovider = initCognitoServiceProvider(credentials);
 
     // create params for user creation
-    var params = {
+    let params = {
         UserPoolId: user.userPoolId, /* required */
         Username: user.userName, /* required */
         DesiredDeliveryMediums: [
@@ -92,10 +92,10 @@ export const createUser = (credentials, user, callback) => {
 
 export const getCognitoUser = (credentials, user, callback) => {
     // init service provider
-    var cognitoidentityserviceprovider = initCognitoServiceProvider(credentials);
+    let cognitoidentityserviceprovider = initCognitoServiceProvider(credentials);
 
     // configure params
-    var params = {
+    let params = {
         UserPoolId: user.userPoolId, /* required */
         Username: user.userName /* required */
     };
@@ -107,7 +107,7 @@ export const getCognitoUser = (credentials, user, callback) => {
             callback(err);
         }
         else {
-            var user = getUserFromCognitoUser(cognitoUser, cognitoUser.UserAttributes);
+            let user = getUserFromCognitoUser(cognitoUser, cognitoUser.UserAttributes);
             callback(null, user);
         }
     });
@@ -119,7 +119,8 @@ export const getCognitoUser = (credentials, user, callback) => {
  * @return Populate User object
  */
 export const getUserFromCognitoUser = (cognitoUser, attributeList) => {
-    var user = {}
+
+    let user: any = {}
     try {
         user.userName = cognitoUser.Username;
         user.enabled = cognitoUser.Enabled;
@@ -149,8 +150,8 @@ export const getUserFromCognitoUser = (cognitoUser, attributeList) => {
  * Get a CognitoCredentialsProvider populated with supplied creds
  * @param credentials Credentials for hydrate the provider
  */
-export const initCognitoServiceProvider(credentials) => {
-    var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider({
+export const initCognitoServiceProvider = (credentials) => {
+    let cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider({
         apiVersion: '2016-04-18',
         sessionToken: credentials.claim.SessionToken,
         accessKeyId: credentials.claim.AccessKeyId,
@@ -166,19 +167,19 @@ export const initCognitoServiceProvider(credentials) => {
  * @param callback Callback with created tenant results
  */
 export const createUserPool = (tenantId) => {
-    var promise = new Promise((resolve, reject) => {
+    let promise = new Promise((resolve, reject) => {
         // init the service provider and email message content
-        var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider({
+        let cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider({
             apiVersion: '2016-04-18',
             region: configuration.aws_region
         });
 
-        var SnsArn = configuration.role.sns;
+        let SnsArn = configuration.role.sns;
         //Invite Message:
-        var inviteMessage = '<img src="https://d0.awsstatic.com/partner-network/logo_apn.png" alt="AWSPartner"> <br><br>Welcome to the AWS QuickStart for SaaS Identity, featuring Cognito. <br><br>Login to the Multi-Tenant Identity Reference Architecture. <br><br>Username: {username} <br><br>Password: {####}';
-        var emailSubject = 'AWS-QuickStart-SaaS-Identity-Cognito';
+        let inviteMessage = '<img src="https://d0.awsstatic.com/partner-network/logo_apn.png" alt="AWSPartner"> <br><br>Welcome to the AWS QuickStart for SaaS Identity, featuring Cognito. <br><br>Login to the Multi-Tenant Identity Reference Architecture. <br><br>Username: {username} <br><br>Password: {####}';
+        let emailSubject = 'AWS-QuickStart-SaaS-Identity-Cognito';
         // init JSON structure with pool settings
-        var params = {
+        let params = {
             PoolName: tenantId, /* required */
             AdminCreateUserConfig: {
                 AllowAdminCreateUserOnly: true,
@@ -319,14 +320,14 @@ export const createUserPool = (tenantId) => {
  * @param callback Callback with client results
  */
 export const createUserPoolClient = (poolConfig) => {
-    var promise = new Promise((resolve, reject) => {
-        var cognitoIdenityServiceProvider = new AWS.CognitoIdentityServiceProvider({
+    let promise = new Promise((resolve, reject) => {
+        let cognitoIdenityServiceProvider = new AWS.CognitoIdentityServiceProvider({
             apiVersion: '2016-04-18',
             region: configuration.aws_region
         });
 
         // config the client parameters
-        var params = {
+        let params = {
             ClientName: poolConfig.ClientName, /* required */
             UserPoolId: poolConfig.UserPoolId, /* required */
             GenerateSecret: false,
@@ -380,14 +381,14 @@ export const createUserPoolClient = (poolConfig) => {
  * @returns {Promise} A promise with the identity pools results
  */
 export const createIdentityPool = (clientConfigParams) => {
-    var promise = new Promise((resolve, reject) => {
+    let promise = new Promise((resolve, reject) => {
 
         // init identity params
-        var cognitoIdentity = new AWS.CognitoIdentity({ apiVersion: '2014-06-30', region: configuration.aws_region });
-        var provider = 'cognito-idp.' + configuration.aws_region + '.amazonaws.com/' + clientConfigParams.UserPoolId;
+        let cognitoIdentity = new AWS.CognitoIdentity({ apiVersion: '2014-06-30', region: configuration.aws_region });
+        let provider = 'cognito-idp.' + configuration.aws_region + '.amazonaws.com/' + clientConfigParams.UserPoolId;
 
         // config identity provider
-        var params = {
+        let params = {
             AllowUnauthenticatedIdentities: false, /* required */
             IdentityPoolName: clientConfigParams.Name, /* required */
             CognitoIdentityProviders: [
@@ -422,16 +423,16 @@ export const createIdentityPool = (clientConfigParams) => {
  * @returns The populated template
  */
 export const getPolicyTemplate = (policyType, policyConfig) => {
-    var policyTemplate = {};
+    let policyTemplate = {};
 
     // create the ARN prefixes for policies
-    var arnPrefix = 'arn:aws:dynamodb:' + policyConfig.region + ':' + policyConfig.accountId + ':table/';
-    var databaseArnPrefix = 'arn:aws:dynamodb:' + policyConfig.region + ':' + policyConfig.accountId + ':table/';
-    var cognitoArn = 'arn:aws:cognito-idp' + ':' + policyConfig.region + ':' + policyConfig.accountId + ':userpool/' + policyConfig.userPoolId;
+    let arnPrefix = 'arn:aws:dynamodb:' + policyConfig.region + ':' + policyConfig.accountId + ':table/';
+    let databaseArnPrefix = 'arn:aws:dynamodb:' + policyConfig.region + ':' + policyConfig.accountId + ':table/';
+    let cognitoArn = 'arn:aws:cognito-idp' + ':' + policyConfig.region + ':' + policyConfig.accountId + ':userpool/' + policyConfig.userPoolId;
 
     // populate database params
     // setup params for templates
-    var policyParams = {
+    let policyParams = {
         tenantId: policyConfig.tenantId,
         arnPrefix: arnPrefix,
         cognitoArn: cognitoArn,
@@ -459,7 +460,7 @@ export const getPolicyTemplate = (policyType, policyConfig) => {
  * @returns The populated template
  */
 export const getTrustPolicy = (trustPolicy) => {
-    var trustPolicyTemplate = {
+    let trustPolicyTemplate = {
         "Version": "2012-10-17",
         "Statement": [{
             "Effect": "Allow",
@@ -486,8 +487,8 @@ export const getTrustPolicy = (trustPolicy) => {
  * @param policyParams Dictionary with configuration parameters
  * @returns The populated system admin policy template
  */
-export const getTenantAdminPolicy(policyParams) => {
-    var tenantAdminPolicyTemplate = {
+export const getTenantAdminPolicy = (policyParams) => {
+    let tenantAdminPolicyTemplate = {
         "Version": "2012-10-17",
         "Statement": [
             {
@@ -581,8 +582,8 @@ export const getTenantAdminPolicy(policyParams) => {
  * @param policyParams Dictionary with configuration parameters
  * @returns The populated tenant user policy template
  */
-export const getTenantUserPolicy(policyParams) => {
-    var tenantUserPolicyTemplate = {
+export const getTenantUserPolicy = (policyParams) => {
+    let tenantUserPolicyTemplate = {
         "Version": "2012-10-17",
         "Statement": [
             {
@@ -664,8 +665,8 @@ export const getTenantUserPolicy(policyParams) => {
  * @param policyParams Dictionary with configuration parameters
  * @returns The populated tenant user policy template
  */
-export const getSystemAdminPolicy(policyParams) => {
-    var systemAdminPolicyTemplate = {
+export const getSystemAdminPolicy = (policyParams) => {
+    let systemAdminPolicyTemplate = {
         "Version": "2012-10-17",
         "Statement": [
             {
@@ -718,8 +719,8 @@ export const getSystemAdminPolicy(policyParams) => {
  * @param policyParams Dictionary with configuration parameters
  * @returns The populated tenant user policy template
  */
-export const getSystemUserPolicy(policyParams) => {
-    var systemUserPolicyTemplate = {
+export const getSystemUserPolicy = (policyParams) => {
+    let systemUserPolicyTemplate = {
         "Version": "2012-10-17",
         "Statement": [
             {
@@ -825,11 +826,11 @@ export const getSystemUserPolicy(policyParams) => {
  * @param {Promise} Results of the created policy
  */
 export const createPolicy = (policyParams) => {
-    var promise = new Promise((resolve, reject) => {
-        var iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+    let promise = new Promise((resolve, reject) => {
+        let iam = new AWS.IAM({ apiVersion: '2010-05-08' });
 
-        var policyDoc = JSON.stringify(policyParams.policyDocument);
-        var params = {
+        let policyDoc = JSON.stringify(policyParams.policyDocument);
+        let params = {
             PolicyDocument: policyDoc, /* required */
             PolicyName: policyParams.policyName, /* required */
             Description: policyParams.policyName
@@ -854,11 +855,11 @@ export const createPolicy = (policyParams) => {
  * @param {Promise} Results of the created role
  */
 export const createRole = (roleParams) => {
-    var promise = new Promise((resolve, reject) => {
-        var iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+    let promise = new Promise((resolve, reject) => {
+        let iam = new AWS.IAM({ apiVersion: '2010-05-08' });
 
-        var policyDoc = JSON.stringify(roleParams.policyDocument);
-        var params = {
+        let policyDoc = JSON.stringify(roleParams.policyDocument);
+        let params = {
             AssumeRolePolicyDocument: policyDoc, /* required */
             RoleName: roleParams.roleName
         };
@@ -881,10 +882,10 @@ export const createRole = (roleParams) => {
  * @param {Promise} The results of the policy assignment to the role
  */
 export const addPolicyToRole = (policyRoleParams) => {
-    var promise = new Promise((resolve, reject) => {
-        var iam = new AWS.IAM({ apiVersion: '2010-05-08' });
-        var policyDoc = JSON.stringify(policyRoleParams.policyDocument);
-        var params = {
+    let promise = new Promise((resolve, reject) => {
+        let iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        // let policyDoc = JSON.stringify(policyRoleParams.policyDocument);
+        let params = {
             PolicyArn: policyRoleParams.PolicyArn, /* required */
             RoleName: policyRoleParams.RoleName /* required */
         };
@@ -907,12 +908,12 @@ export const addPolicyToRole = (policyRoleParams) => {
  * @returns {Promise} Promise with status of assignment
  */
 export const addRoleToIdentity = (identityPoolRoleParams) => {
-    var promise = new Promise((resolve, reject) => {
-        var cognitoidentity = new AWS.CognitoIdentity({ apiVersion: '2014-06-30', region: configuration.aws_region });
-        var policyDoc = JSON.stringify(identityPoolRoleParams.policyDocument);
-        var providerName = 'cognito-idp.' + configuration.cognito_region + '.amazonaws.com/' + identityPoolRoleParams.provider + ':' + identityPoolRoleParams.ClientId;
+    let promise = new Promise((resolve, reject) => {
+        let cognitoidentity = new AWS.CognitoIdentity({ apiVersion: '2014-06-30', region: configuration.aws_region });
+        // let policyDoc = JSON.stringify(identityPoolRoleParams.policyDocument);
+        let providerName = 'cognito-idp.' + configuration.cognito_region + '.amazonaws.com/' + identityPoolRoleParams.provider + ':' + identityPoolRoleParams.ClientId;
 
-        var params = {
+        let params = {
             IdentityPoolId: identityPoolRoleParams.IdentityPoolId, /* required */
             Roles: {
                 /* required */
@@ -964,9 +965,9 @@ export const addRoleToIdentity = (identityPoolRoleParams) => {
  * @returns {Promise} Status of the enable/disable call
  */
 export const updateUserEnabledStatus = (credentials, userPoolId, userName, enable) => {
-    var promise = new Promise((resolve, reject) => {
+    let promise = new Promise((resolve, reject) => {
         // configure the identity provider
-        var cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
+        let cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
             apiVersion: '2016-04-18',
             sessionToken: credentials.claim.SessionToken,
             accessKeyId: credentials.claim.AccessKeyId,
@@ -975,7 +976,7 @@ export const updateUserEnabledStatus = (credentials, userPoolId, userName, enabl
         });
 
         // init the params
-        var params = {
+        let params = {
             UserPoolId: userPoolId, /* required */
             Username: userName /* required */
         };
@@ -1011,10 +1012,10 @@ export const updateUserEnabledStatus = (credentials, userPoolId, userName, enabl
  * @returns {Promise} A collection of found users
  */
 export const getUsersFromPool = (credentials, userPoolId, region) => {
-    var promise = new Promise((resolve, reject) => {
+    let promise = new Promise((resolve, reject) => {
 
         // init the Cognito service provider
-        var cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
+        let cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
             apiVersion: '2016-04-18',
             sessionToken: credentials.claim.SessionToken,
             accessKeyId: credentials.claim.AccessKeyId,
@@ -1023,7 +1024,7 @@ export const getUsersFromPool = (credentials, userPoolId, region) => {
         });
 
         // search configuration
-        var searchParams = {
+        let searchParams = {
             UserPoolId: userPoolId, /* required */
             AttributesToGet: [
                 'email',
@@ -1043,9 +1044,9 @@ export const getUsersFromPool = (credentials, userPoolId, region) => {
             if (err)
                 reject(err);
             else {
-                var userList = [];
+                let userList = [];
                 data.Users.forEach((cognitoUser) => {
-                    var user = getUserFromCognitoUser(cognitoUser, cognitoUser.Attributes);
+                    let user = getUserFromCognitoUser(cognitoUser, cognitoUser.Attributes);
                     userList.push(user);
                 });
                 resolve(userList);
@@ -1064,8 +1065,8 @@ export const getUsersFromPool = (credentials, userPoolId, region) => {
  * @returns {Promise} The status of the user update
  */
 export const updateUser = (credentials, user, userPoolId, region) => {
-    var promise = new Promise((resolve, reject) => {
-        var cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
+    let promise = new Promise((resolve, reject) => {
+        let cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
             apiVersion: '2016-04-18',
             sessionToken: credentials.claim.SessionToken,
             accessKeyId: credentials.claim.AccessKeyId,
@@ -1074,7 +1075,7 @@ export const updateUser = (credentials, user, userPoolId, region) => {
         });
 
         // init the update parameters
-        var params = {
+        let params = {
             UserAttributes: [/* required */
                 {
                     Name: 'custom:role', /* required */
@@ -1114,9 +1115,9 @@ export const updateUser = (credentials, user, userPoolId, region) => {
  * @returns {Promise} Results of the deletion
  */
 export const deleteUser = (credentials, userId, userPoolId, region) => {
-    var promise = new Promise((resolve, reject) => {
+    let promise = new Promise((resolve, reject) => {
         // init the identity provider
-        var cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
+        let cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
             apiVersion: '2016-04-18',
             sessionToken: credentials.claim.SessionToken,
             accessKeyId: credentials.claim.AccessKeyId,
@@ -1125,7 +1126,7 @@ export const deleteUser = (credentials, userId, userPoolId, region) => {
         });
 
         // init deletion parameters
-        var params = {
+        let params = {
             UserPoolId: userPoolId, /* required */
             Username: userId /* required */
         };
@@ -1148,15 +1149,15 @@ export const deleteUser = (credentials, userId, userPoolId, region) => {
  * @param region The region for the credentials
  * @returns {Promise} Results of the deletion
  */
-export const deleteUserPool = (userPoolId, region) => {
-    var promise = new Promise((resolve, reject) => {
+export const deleteUserPool = (userPoolId, _region?) => {
+    let promise = new Promise((resolve, reject) => {
         // init the identity provider
-        var cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
+        let cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
             apiVersion: '2016-04-18',
             region: configuration.aws_region
         });
 
-        var params = {
+        let params = {
             UserPoolId: userPoolId /* required */
         };
 
@@ -1178,12 +1179,12 @@ export const deleteUserPool = (userPoolId, region) => {
  * @returns {Promise} A promise with the identity pools results
  */
 export const deleteIdentityPool = (IdentityPoolId) => {
-    var promise = new Promise((resolve, reject) => {
+    let promise = new Promise((resolve, reject) => {
 
         // init identity params
-        var cognitoIdentity = new AWS.CognitoIdentity({ apiVersion: '2014-06-30', region: configuration.aws_region });
+        let cognitoIdentity = new AWS.CognitoIdentity({ apiVersion: '2014-06-30', region: configuration.aws_region });
 
-        var params = {
+        let params = {
             IdentityPoolId: IdentityPoolId /* required */
         };
 
@@ -1207,11 +1208,11 @@ export const deleteIdentityPool = (IdentityPoolId) => {
  * @param {Promise} Results of the created role
  */
 export const deleteRole = (role) => {
-    var promise = new Promise((resolve, reject) => {
-        var iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+    let promise = new Promise((resolve, reject) => {
+        let iam = new AWS.IAM({ apiVersion: '2010-05-08' });
 
 
-        var params = {
+        let params = {
             RoleName: role /* required */
         };
 
@@ -1233,10 +1234,10 @@ export const deleteRole = (role) => {
  * @param {Promise} Results of the created policy
  */
 export const deletePolicy = (policy) => {
-    var promise = new Promise((resolve, reject) => {
-        var iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+    let promise = new Promise((resolve, reject) => {
+        let iam = new AWS.IAM({ apiVersion: '2010-05-08' });
 
-        var params = {
+        let params = {
             PolicyArn: policy /* required */
         };
         iam.deletePolicy(params, (err, deletedPolicy) => {
@@ -1259,9 +1260,9 @@ export const deletePolicy = (policy) => {
  * @param {Promise} Results of the created policy
  */
 export const detachRolePolicy = (policy, role) => {
-    var promise = new Promise((resolve, reject) => {
-        var iam = new AWS.IAM({ apiVersion: '2010-05-08' });
-        var params = {
+    let promise = new Promise((resolve, reject) => {
+        let iam = new AWS.IAM({ apiVersion: '2010-05-08' });
+        let params = {
             PolicyArn: policy, /* required */
             RoleName: role /* required */
         };
@@ -1284,9 +1285,9 @@ export const detachRolePolicy = (policy, role) => {
  * @param {Promise} Results of the created policy
  */
 export const deleteTable = (table) => {
-    var promise = new Promise((resolve, reject) => {
-        var dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10', region: configuration.aws_region });
-        var params = {
+    let promise = new Promise((resolve, reject) => {
+        let dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10', region: configuration.aws_region });
+        let params = {
             TableName: table /* required */
         };
         dynamodb.deleteTable(params, (err, data) => {

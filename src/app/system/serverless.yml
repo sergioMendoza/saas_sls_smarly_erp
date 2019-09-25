@@ -22,7 +22,8 @@ custom:
     - prod
 
   env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
-  prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
+  prefix:
+    ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
     # customDomain:
     # domainName: <registered_domain_name>
     # basePath: ''
@@ -43,7 +44,7 @@ provider:
       Action:
         - "lambda:InvoqueFunction"
       Resource: "*"
-    # allow accessto dynamodb base tenant 
+    # allow accessto dynamodb base tenant
     - Effect: "Allow"
       Action:
         - dynamodb:DescribeTable
@@ -73,9 +74,21 @@ functions:
           path: hello
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
 
+  regSystemAdmin:
+    handler: handler.regSystemAdmin
+    events:
+      - http:
+          method: post
+          path: sys/admin
+  delSystemAdmin:
+    handler: handler.delSystemAdmin
+    events:
+      - http:
+          method: delete
+          path: sys/admin
+
 # create our resources with separate cloudFormation Templates
 resources:
-  
   # User Table
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/dynamodb-user.yml)}
 
@@ -84,4 +97,3 @@ resources:
 
   # API Gateway Errors and CORS
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}
-

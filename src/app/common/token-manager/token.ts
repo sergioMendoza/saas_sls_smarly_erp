@@ -170,7 +170,7 @@ export const getUserPoolWithParams = (userName, callback) => {
     });
 };
 
-export const getInfra = (input, callback) => {
+export const getInfra = (_input, callback) => {
     // Create URL for user-manager request
     // let userURL = userURL + '/system/' + userName;
     let tenantsUrl = configuration.url.tenant + 's/system/';
@@ -229,15 +229,17 @@ export const authenticateUserInPool = (userPool, idToken, callback) => {
         provider: provider,
         IdentityPoolId: userPool.IdentityPoolId
     };
-    let getIdentity = getId(params, (ret, data) => {
+    //let getIdentity =
+     getId(params, (ret, _data) => {
         if (ret) {
             let params = {
                 token: idToken,
                 IdentityId: ret.IdentityId,
                 provider: provider
             };
-            let returnedIdentity = ret;
-            let getCredentials = getCredentialsForIdentity(params, (ret, data) => {
+            //let returnedIdentity = ret;
+            //let getCredentials = 
+            getCredentialsForIdentity(params, (ret, _data) => {
                 if (ret) {
                     // put claim and user full name into one response
                     callback(null, {"claim": ret.Credentials});

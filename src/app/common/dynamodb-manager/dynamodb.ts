@@ -21,7 +21,7 @@ export default class DynamoDBManager {
     tableDefinition;
     private _tableExists: boolean;
 
-    constructor(tableDefinition, credentials, configSettings, callback?) {
+    constructor(tableDefinition, _credentials, _configSettings, _callback?) {
         this.tableDefinition = tableDefinition;
         this._tableExists = false;
     }
@@ -35,12 +35,12 @@ export default class DynamoDBManager {
         let newTable = {
             TableName: this.tableDefinition.TableName,
         };
-        dynamoDB.describeTable(newTable, (error, data) => {
+        dynamoDB.describeTable(newTable, (error, _data) => {
             if (!error) {
                 winston.debug("Table already exists: " + this.tableDefinition.TableName);
                 callback(null);
             } else {
-                dynamoDB.createTable(this.tableDefinition, (err, data) => {
+                dynamoDB.createTable(this.tableDefinition, (err, _data) => {
                     if (err) {
                         winston.error("Unable to create table: " + this.tableDefinition.TableName);
                         callback(err);
@@ -105,7 +105,7 @@ export default class DynamoDBManager {
     }
 
     putItem(item, credentials, callback) {
-        this.getDynamoDBDocumentClient(credentials, (error, docClient) => {
+        this.getDynamoDBDocumentClient(credentials, (_error, docClient) => {
             let itemParams = {
                 TableName: this.tableDefinition.TableName,
                 Item: item
@@ -122,7 +122,7 @@ export default class DynamoDBManager {
     }
 
     updateItem(productUpdateParams, credentials, callback) {
-        this.getDynamoDBDocumentClient(credentials, (error, docClient) => {
+        this.getDynamoDBDocumentClient(credentials, (_error, docClient) => {
             docClient.update(productUpdateParams, (err, data) => {
                 if (err)
                     callback(err);
@@ -133,7 +133,7 @@ export default class DynamoDBManager {
     }
 
     getItem(keyParams, credentials, callback) {
-        this.getDynamoDBDocumentClient(credentials, (error, docClient) => {
+        this.getDynamoDBDocumentClient(credentials, (_error, docClient) => {
             let fetchParams = {
                 TableName: this.tableDefinition.TableName,
                 Key: keyParams
@@ -149,7 +149,7 @@ export default class DynamoDBManager {
     }
 
     deleteItem(deleteItemParams, credentials, callback) {
-        this.getDynamoDBDocumentClient(credentials, (error, docClient) => {
+        this.getDynamoDBDocumentClient(credentials, (_error, docClient) => {
             docClient.delete(deleteItemParams, (err, data) => {
                 if (err)
                     callback(err);
@@ -160,7 +160,7 @@ export default class DynamoDBManager {
     }
 
     scan(scanParams, credentials, callback) {
-        this.getDynamoDBDocumentClient(credentials, (error, docClient) => {
+        this.getDynamoDBDocumentClient(credentials, (_error, docClient) => {
             docClient.scan(scanParams, (err, data) => {
                 if (err)
                     callback(err);
@@ -171,7 +171,7 @@ export default class DynamoDBManager {
     }
 
     batchGetItem(batchGetParams, credentials, callback) {
-        this.getDynamoDBDocumentClient(credentials, (error, docClient) => {
+        this.getDynamoDBDocumentClient(credentials, (_error, docClient) => {
             docClient.batchGet(batchGetParams, (err, data) => {
                 if (err)
                     callback(err);
@@ -183,11 +183,11 @@ export default class DynamoDBManager {
 
     tableExists(tableName, credentials, callback) {
 
-        this.getDynamoDBDocumentClient(credentials, (error, docClient) => {
+        this.getDynamoDBDocumentClient(credentials, (_error, docClient) => {
             let newTable = {
                 TableName: tableName,
             };
-            docClient.describeTable(newTable, (err, data) => {
+            docClient.describeTable(newTable, (err, _data) => {
                 if (err)
                     callback(err);
                 else

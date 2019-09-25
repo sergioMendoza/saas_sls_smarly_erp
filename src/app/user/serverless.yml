@@ -76,6 +76,19 @@ functions:
               paths:
                 id: true
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+  createUserSystem:
+    handler: handler.createUserSystem
+    events:
+      - http:
+          method: post
+          path: user/system
+
+  delUserTenants:
+    handler: handler.delUserTenants
+    events:
+      - http:
+          method: delete
+          path: user/tenants
 
 # create our resources with separate cloudFormation Templates
 resources:

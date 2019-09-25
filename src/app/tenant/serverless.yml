@@ -55,5 +55,17 @@ functions:
     events:
       - http:
           method: get
-          path: reg
+          path: tenant/hello
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+  createTenant:
+    handler: handler.createTenant
+    events:
+      - http:
+          method: post
+          path: tenant
+  ListTenantSystem:
+    handler: handler.ListTenantSystem
+    events:
+      - http:
+          method: get
+          path: tenants/system
