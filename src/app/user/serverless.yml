@@ -36,7 +36,7 @@ provider:
   profile: default
   region: ${opt:region, 'us-east-1'}
   apiKeys:
-    - systemApiKey
+    - userApiKey
   iamRoleStatements:
     # allow lambda invocation and request
     - Effect: "Allow"
