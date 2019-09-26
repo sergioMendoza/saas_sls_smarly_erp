@@ -11,7 +11,11 @@
     "@types/uuid": "^3.4.5",
     "async": "^3.1.0",
     "aws-lambda": "^0.1.2",
+<<<<<<< HEAD
     "aws-sdk": "^2.536.0",
+=======
+    "aws-sdk": "^2.537.0",
+>>>>>>> fbe08eb728fd04589be492c8ee435058d2e9f841
     "request": "^2.88.0",
     "uuid": "^3.3.3",
     "winston": "^3.2.1"
@@ -28,7 +32,8 @@
     "source-map-support": "^0.5.6",
     "ts-loader": "^4.2.0",
     "typescript": "^2.9.2",
-    "webpack": "^4.5.0"
+    "webpack": "^4.5.0",
+    "webpack-node-externals": "^1.7.2"
   },
   "author": "The serverless webpack authors (https://github.com/elastic-coders/serverless-webpack)",
   "license": "MIT"

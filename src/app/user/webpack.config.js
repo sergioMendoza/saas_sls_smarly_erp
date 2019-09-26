@@ -1,5 +1,6 @@
 const path = require('path');
 const slsw = require('serverless-webpack');
+const nodeExternals = require('webpack-node-externals');
 
 const entries = {};
 
@@ -10,6 +11,7 @@ Object.keys(slsw.lib.entries).forEach(
 module.exports = {
   mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
   entry: entries,
+  externals: [nodeExternals()],
   devtool: 'source-map',
   resolve: {
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],

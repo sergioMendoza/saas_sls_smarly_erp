@@ -1,5 +1,4 @@
 import {APIGatewayProxyHandler, Handler} from 'aws-lambda';
-// import * as bodyParser from 'body-parser';
 // import * as uuidV4 from 'uuid/v4';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
@@ -392,7 +391,11 @@ const lookupUserPoolData = (credentials, userId, tenantId, isSystemContext, call
         };
 
         // get the item from the database
+<<<<<<< HEAD
         dynamoManager.query(searchParams, credentials, (err, users) => {
+=======
+        dynamoManager.query(searchParams, credentials,  (err, users) => {
+>>>>>>> fbe08eb728fd04589be492c8ee435058d2e9f841
             if (err) {
                 winston.error('Error getting user: ' + err.message);
                 callback(err);

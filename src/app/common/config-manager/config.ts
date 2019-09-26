@@ -6,13 +6,6 @@ export interface SaasEnvironmentConfig {
     domain?: string;
     region?: string,
     aws_account?: string,
-    port: {
-        auth: number,
-        user: number,
-        tenant: number,
-        reg: number,
-        sys: number
-    },
     role?: {
         sns: string
     },
@@ -71,13 +64,6 @@ export interface SaasConfig {
     tier: {
         system: string
     };
-    port: {
-        auth: number,
-        user: number,
-        tenant: number,
-        reg: number,
-        sys: number
-    };
     loglevel: string;
     url: {
         tenant: string,
@@ -108,13 +94,12 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                 process.env.USER_TABLE == undefined ||
                 process.env.TENANT_TABLE == undefined) {
                 throw `Production Environment Variables Not Properly Configured. \n
-                Please ensure REGION, SERVCE_URL, SNS_ROLE_ARN, AWS_ACCOUNT_ID environment Variables are set.`;
+                Please ensure REGION, SERVICE_URL, SNS_ROLE_ARN, AWS_ACCOUNT_ID environment Variables are set.`;
             } else {
                 winston.debug('Currently Running in', +environment);
-                let port = prod.port;
                 let name = prod.name;
                 //var table = prod.table;
-                let conf:  SaasConfig = {
+                return {
                     environment: environment,
                     //web_client: process.env.WEB_CLIENT,
                     aws_region: process.env.REGION,
@@ -132,7 +117,6 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                         sns: process.env.SNS_ROLE_ARN
                     },
                     tier: prod.tier,
-                    port: port,
                     loglevel: prod.log.level,
                     url: {
                         tenant: prod.protocol + process.env.SERVICE_URL + '/tenant',
@@ -141,18 +125,16 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                         auth: prod.protocol + process.env.SERVICE_URL + '/auth',
                         sys: prod.protocol + process.env.SERVICE_URL + '/sys'
                     }
-                };
-                return conf
+                }
 
             }
 
 
         case "dev":
-            let port = dev.port;
             let name = dev.name;
             let table = dev.table;
 
-            let conf: SaasConfig = {
+            return {
                 environment: environment,
                 aws_region: dev.region,
                 cognito_region: dev.region,
@@ -164,17 +146,15 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                 userRole: dev.userRole,
                 role: dev.role,
                 tier: dev.tier,
-                port: port,
                 loglevel: dev.log.level,
                 url: {
-                    tenant: dev.protocol + dev.domain + ':' + port.tenant + '/tenant',
-                    user: dev.protocol + dev.domain + ':' + port.user + '/user',
-                    reg: dev.protocol + dev.domain + ':' + port.reg + '/reg',
-                    auth: dev.protocol + dev.domain + ':' + port.auth + '/auth',
-                    sys: dev.protocol + dev.domain + ':' + port.sys + '/sys',
+                    tenant: dev.protocol + dev.domain + '/tenant',
+                    user: dev.protocol + dev.domain + '/user',
+                    reg: dev.protocol + dev.domain + '/reg',
+                    auth: dev.protocol + dev.domain + '/auth',
+                    sys: dev.protocol + dev.domain + '/sys',
                 }
             };
-            return conf; 
 
         default:
             throw `No Environment Configured. \n 

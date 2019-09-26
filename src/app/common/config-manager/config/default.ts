@@ -1,17 +1,10 @@
 export default {
   "Config": {
     "dev": {
-      "protocol": "http://",
-      "domain": "127.0.0.1",
-      "region": "",
+      "protocol": "https://",
+      "domain": "dev-saas.vonallem.com",
+      "region": "us-east-1",
       "aws_account": "",
-      "port": {
-        "auth": 3000,
-        "user": 3001,
-        "tenant": 3003,
-        "reg": 3004,
-        "sys": 3011
-      },
       "role": {
         "sns": ""
       },
@@ -41,15 +34,6 @@ export default {
     },
     "prod": {
       "protocol": "https://",
-      "port": {
-        "auth": 3000,
-        "user": 3001,
-        "tenant": 3003,
-        "reg": 3004,
-        "sys": 3011,
-        "product": 3006,
-        "order": 3015
-      },
       "name": {
         "auth": "Authentication Manager",
         "user": "User Manager",

@@ -7,7 +7,11 @@ plugins:
   - serverless-pseudo-parameters
   - serverless-offline
   - serverless-stage-manager
+<<<<<<< HEAD
   # - serverless-domain-manager
+=======
+  - serverless-domain-manager
+>>>>>>> fbe08eb728fd04589be492c8ee435058d2e9f841
   - serverless-package-external
 
 custom:
@@ -23,11 +27,19 @@ custom:
 
   env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
   prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
+<<<<<<< HEAD
   # customDomain:
   # domainName: <registered_domain_name>
   # basePath: 'tenant'
   # stage: ${self:provider.stage}
   # createRoute53Record: true
+=======
+  customDomain:
+    basePath: tenants
+    domainName: ${self:custom.env.serviceUrl.${self:provider.stage}}
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+>>>>>>> fbe08eb728fd04589be492c8ee435058d2e9f841
 
 provider:
   name: aws

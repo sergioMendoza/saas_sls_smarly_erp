@@ -7,7 +7,7 @@ plugins:
   - serverless-webpack
   - serverless-offline
   - serverless-stage-manager
-  # - serverless-domain-manager
+  - serverless-domain-manager
   - serverless-package-external
   - serverless-pseudo-parameters
 
@@ -24,11 +24,11 @@ custom:
 
   env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
   prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
-    # customDomain:
-    # domainName: <registered_domain_name>
-    # basePath: 'user'
-    # stage: ${self:provider.stage}
-  # createRoute53Record: true
+  customDomain:
+    basePath: users
+    domainName: ${self:custom.env.serviceUrl.${self:provider.stage}}
+    stage: ${self:provider.stage}
+    createRoute53Record: true
 
 provider:
   name: aws
@@ -44,7 +44,11 @@ provider:
       Action:
         - "lambda:InvoqueFunction"
       Resource: "*"
+<<<<<<< HEAD
     # allow accessto dynamodb base tenant
+=======
+    # allow access dynamoDB base tenant
+>>>>>>> fbe08eb728fd04589be492c8ee435058d2e9f841
     - Effect: "Allow"
       Action:
         - dynamodb:DescribeTable
@@ -67,6 +71,7 @@ provider:
     TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
 
 functions:
+<<<<<<< HEAD
     hello:
       handler: hello.hello
       events:
@@ -93,3 +98,24 @@ functions:
         - http:
             method: delete
             path: tenants
+=======
+  getUserPool:
+    handler: handler.getUserPool
+    events:
+      - http:
+          method: get
+          path: pool/{id}
+  createUserSystem:
+    handler: handler.createUserSystem
+    events:
+      - http:
+          method: post
+          path: system
+
+  delUserTenants:
+    handler: handler.delUserTenants
+    events:
+      - http:
+          method: delete
+          path: tenants
+>>>>>>> fbe08eb728fd04589be492c8ee435058d2e9f841

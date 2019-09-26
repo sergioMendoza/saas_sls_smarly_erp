@@ -7,11 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@types/body-parser": "^1.17.1",
     "@types/request": "^2.48.2",
     "@types/uuid": "^3.4.5",
     "aws-lambda": "^0.1.2",
-    "body-parser": "^1.19.0",
     "request": "^2.88.0",
     "uuid": "^3.3.3",
     "winston": "^3.2.1"
