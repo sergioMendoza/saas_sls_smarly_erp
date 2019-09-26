@@ -1,5 +1,4 @@
 import { APIGatewayProxyHandler, Handler } from 'aws-lambda';
-// import * as bodyParser from 'body-parser';
 import * as uuidV4 from 'uuid/v4';
 import * as configModule from '../common/config-manager/config';
 import * as winston from 'winston';
@@ -84,7 +83,7 @@ export const regSystemAdmin: Handler = async (event, _context) => {
         })
     }
   });
-}
+};
 
 /**
  * Delete all system infrastructure and tables.
@@ -118,7 +117,7 @@ export const delSystemAdmin: Handler = (_event, _context) => {
         })
       };
   });
-}
+};
 
 
 export const hello: APIGatewayProxyHandler = async (event, _context) => {

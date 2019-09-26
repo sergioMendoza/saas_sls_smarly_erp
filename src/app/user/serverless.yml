@@ -6,7 +6,7 @@ plugins:
   - serverless-webpack
   - serverless-offline
   - serverless-stage-manager
-  # - serverless-domain-manager
+  - serverless-domain-manager
   - serverless-package-external
   - serverless-pseudo-parameters
 
@@ -23,11 +23,11 @@ custom:
 
   env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
   prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
-    # customDomain:
-    # domainName: <registered_domain_name>
-    # basePath: 'user'
-    # stage: ${self:provider.stage}
-  # createRoute53Record: true
+    customDomain:
+    domainName: saas.vonallem.com
+    basePath: 'user'
+    stage: ${self:provider.stage}
+    createRoute53Record: true
 
 provider:
   name: aws
@@ -43,7 +43,7 @@ provider:
       Action:
         - "lambda:InvoqueFunction"
       Resource: "*"
-    # allow accessto dynamodb base tenant 
+    # allow access dynamoDB base tenant
     - Effect: "Allow"
       Action:
         - dynamodb:DescribeTable
@@ -71,11 +71,6 @@ functions:
       - http:
           method: get
           path: pool/{id}
-          request:
-            parameters:
-              paths:
-                id: true
-          authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
   createUserSystem:
     handler: handler.createUserSystem
     events:

@@ -6,7 +6,7 @@ plugins:
   - serverless-webpack
   - serverless-offline
   - serverless-stage-manager
-  # - serverless-domain-manager
+  - serverless-domain-manager
   - serverless-package-external
   - serverless-pseudo-parameters
 
@@ -24,11 +24,11 @@ custom:
   env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
   prefix:
     ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
-    # customDomain:
-    # domainName: <registered_domain_name>
-    # basePath: ''
-    # stage: ${self:provider.stage}
-  # createRoute53Record: true
+    customDomain:
+    domainName: saas.vonallem.com
+    basePath: 'sys'
+    stage: ${self:provider.stage}
+    createRoute53Record: true
 
 provider:
   name: aws
@@ -44,7 +44,7 @@ provider:
       Action:
         - "lambda:InvoqueFunction"
       Resource: "*"
-    # allow accessto dynamodb base tenant
+    # allow access dynamoDB base tenant
     - Effect: "Allow"
       Action:
         - dynamodb:DescribeTable
@@ -79,13 +79,13 @@ functions:
     events:
       - http:
           method: post
-          path: sys/admin
+          path: admin
   delSystemAdmin:
     handler: handler.delSystemAdmin
     events:
       - http:
           method: delete
-          path: sys/admin
+          path: admin
 
 # create our resources with separate cloudFormation Templates
 resources:

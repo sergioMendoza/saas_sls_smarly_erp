@@ -1,5 +1,5 @@
 import * as request from 'request';
-import { SaasConfig } from '../common/config-manager/config';
+import {SaasConfig} from '../common/config-manager/config';
 
 export interface TenantAdmin {
     tenant_id: string;
@@ -12,7 +12,7 @@ export interface TenantAdmin {
     tier?: string;
     firstName?: string;
     lastName?: string;
-};
+}
 
 export interface Tenant {
     id?: string,
@@ -33,7 +33,7 @@ export interface Tenant {
     role: string,
     firstName: string,
     lastName: string
-};
+}
 
 export class TenantAdminManager {
     regTenantUserUrl: string;
@@ -52,7 +52,7 @@ export class TenantAdminManager {
             "firstName": tenant.firstName,
             "lastName": tenant.lastName
         };
-        let promise = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
             // User service REST API URL
             let regTenantUserUrl = configuration.url.user + '/system';
@@ -62,16 +62,15 @@ export class TenantAdminManager {
                 url: regTenantUserUrl,
                 method: "POST",
                 json: true,
-                headers: { "content-type": "application/json" },
+                headers: {"content-type": "application/json"},
                 body: tenantAdmin
             }, (error, response, body) => {
                 if (error || (response.statusCode != 200))
-                    reject(error)
+                    reject(error);
                 else
-                    resolve(body)
+                    resolve(body);
             });
-        });
-        return promise
+        })
     }
 
     static exists(tenant: Tenant, configuration: SaasConfig, callback) {
@@ -83,7 +82,7 @@ export class TenantAdminManager {
             url: userExistsUrl,
             method: "GET",
             json: true,
-            headers: { "content-type": "application/json" }
+            headers: {"content-type": "application/json"}
         }, (error, response, body) => {
             if (error) callback(false);
             else if ((response != null) && (response.statusCode == 400)) callback(false);
@@ -98,10 +97,10 @@ export class TenantAdminManager {
 
     static async saveTenantData(tenant: Tenant, configuration: SaasConfig): Promise<any> {
         let tenantURL: string = configuration.url.tenant;
-        let promise = new Promise( (resolve, reject) => {
-            // init the tenant sace request
+        return new Promise((resolve, reject) => {
+            // init the tenant save request
 
-            var tenantRequestData = {
+            let tenantRequestData = {
                 "id": tenant.id,
                 "companyName": tenant.companyName,
                 "accountName": tenant.accountName,
@@ -124,7 +123,7 @@ export class TenantAdminManager {
                 url: tenantURL,
                 method: "POST",
                 json: true,
-                headers: { "content-type": "application/json" },
+                headers: {"content-type": "application/json"},
                 body: tenantRequestData
             }, function (error, response, body) {
                 if (error || (response.statusCode != 200))
@@ -133,15 +132,13 @@ export class TenantAdminManager {
                     resolve(body);
             });
         });
-
-        return promise;
     }
 
-    static async deleteInfra(configuration: SaasConfig, winston):Promise<any> {
+    static async deleteInfra(configuration: SaasConfig, winston): Promise<any> {
 
-        var promise = new Promise(function (resolve, reject) {
+        return new Promise(function (resolve, reject) {
 
-            var deleteInfraUrl = configuration.url.user + '/tenants';
+            let deleteInfraUrl = configuration.url.user + '/tenants';
 
             // fire request
             request({
@@ -152,15 +149,12 @@ export class TenantAdminManager {
                 if (error || (response.statusCode != 200)) {
                     reject(error);
                     winston.debug('Error Removing Infrastructure');
-                }
-                else {
+                } else {
                     resolve(response.statusCode);
                     winston.debug('Removed Infrastructure');
                 }
             });
         });
-
-        return promise;
     }
 
 }
