@@ -11,6 +11,7 @@ module.exports = {
   mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
   entry: entries,
   devtool: 'source-map',
+
   resolve: {
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
   },

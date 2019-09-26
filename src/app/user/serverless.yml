@@ -1,3 +1,4 @@
+app: sls-saas-user
 service:
   name: sls-saas-user
 
@@ -31,7 +32,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   stage: ${opt:stage, 'dev'}
   profile: default
   region: ${opt:region, 'us-east-1'}
@@ -43,7 +44,7 @@ provider:
       Action:
         - "lambda:InvoqueFunction"
       Resource: "*"
-    # allow accessto dynamodb base tenant 
+    # allow accessto dynamodb base tenant
     - Effect: "Allow"
       Action:
         - dynamodb:DescribeTable
@@ -60,32 +61,35 @@ provider:
     SERVICE_URL: ${self:custom.env.serviceUrl.${self:provider.stage}}
     REGION: ${self:provider.region}
     SNS_ROLE_ARN: ${self:custom.prefix.arn.sns}:${self:custom.env.snsTopic.${self:provider.stage}}
+    AWS_ACCOUNT_ID: ${self:custom.env.accountId.${self:provider.stage}}
     ENV: ${self:provider.stage}
     USER_TABLE: ${self:custom.env.table.user.${self:provider.stage}}
     TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
 
 functions:
-  getUserPool:
-    handler: handler.getUserPool
-    events:
-      - http:
-          method: get
-          path: pool/{id}
-          request:
-            parameters:
-              paths:
-                id: true
-          authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
-  createUserSystem:
-    handler: handler.createUserSystem
-    events:
-      - http:
-          method: post
-          path: system
-
-  delUserTenants:
-    handler: handler.delUserTenants
-    events:
-      - http:
-          method: delete
-          path: tenants
+    hello:
+      handler: hello.hello
+      events:
+        - http:
+            method: get
+            path: hello
+    getUserPool:
+      handler: handler.getUserPool
+      events:
+        - http:
+            method: get
+            path: pool/{id}
+#           # authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+    createUserSystem:
+      handler: handler.createUserSystem
+      events:
+        - http:
+            method: post
+            path: system
+  
+    delUserTenants:
+      handler: handler.delUserTenants
+      events:
+        - http:
+            method: delete
+            path: tenants

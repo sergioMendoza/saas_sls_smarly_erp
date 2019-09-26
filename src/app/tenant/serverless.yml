@@ -4,13 +4,14 @@ service:
 # Add the serverless-webpack plugin
 plugins:
   - serverless-webpack
+  - serverless-pseudo-parameters
   - serverless-offline
   - serverless-stage-manager
-  # - serverless-domain-manager 
+  # - serverless-domain-manager
   - serverless-package-external
-  - serverless-pseudo-parameters
 
 custom:
+  PROJECT_NAME: "sls-saas"
   relativePathToCommon: "../common"
   packageExternal:
     external:
@@ -23,14 +24,14 @@ custom:
   env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
   prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
   # customDomain:
-    # domainName: <registered_domain_name>
-    # basePath: 'tenant'
-    # stage: ${self:provider.stage}
-    # createRoute53Record: true
+  # domainName: <registered_domain_name>
+  # basePath: 'tenant'
+  # stage: ${self:provider.stage}
+  # createRoute53Record: true
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   stage: ${opt:stage, 'dev'}
   profile: default
   region: ${opt:region, 'us-east-1'}
@@ -43,11 +44,14 @@ provider:
       Resource: "*"
 
   environment:
+    PROJECT_NAME: ${self:custom.PROJECT_NAME}
     SERVICE_URL: ${self:custom.env.serviceUrl.${self:provider.stage}}
     REGION: ${self:provider.region}
     SNS_ROLE_ARN: ${self:custom.prefix.arn.sns}:${self:custom.env.snsTopic.${self:provider.stage}}
-    AWS_ACCOUNT_ID: ${self:custom.env.${self:provider.stage}.accountId}
+    AWS_ACCOUNT_ID: ${self:custom.env.accountId.${self:provider.stage}}
     ENV: ${self:provider.stage}
+    SER_TABLE: ${self:custom.env.table.user.${self:provider.stage}}
+    TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
 
 functions:
   hello:

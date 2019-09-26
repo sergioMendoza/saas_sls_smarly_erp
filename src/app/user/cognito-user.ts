@@ -1,5 +1,3 @@
-'use strict';
-
 // Declare dependencies
 import * as AWS from 'aws-sdk';
 import * as winston from 'winston';

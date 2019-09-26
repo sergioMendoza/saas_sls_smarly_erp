@@ -1,11 +1,11 @@
-import * as config from 'config';
+import * as config from './config/default';
 import * as winston from 'winston';
 
 export interface SaasEnvironmentConfig {
-    protocol: string;
-    domain: string;
-    region: string,
-    aws_account: string,
+    protocol?: string;
+    domain?: string;
+    region?: string,
+    aws_account?: string,
     port: {
         auth: number,
         user: number,
@@ -13,7 +13,7 @@ export interface SaasEnvironmentConfig {
         reg: number,
         sys: number
     },
-    role: {
+    role?: {
         sns: string
     },
     name: {
@@ -88,9 +88,9 @@ export interface SaasConfig {
     };
 }
 
-const prod: SaasEnvironmentConfig = config.get('Config.prod');
+const prod: SaasEnvironmentConfig = config.default.Config.prod;
 
-const dev: SaasEnvironmentConfig = config.get('Config.dev');
+const dev: SaasEnvironmentConfig = config.default.Config.dev;
 
 export const configure = (environment: string | null | undefined): SaasConfig => {
     if (environment === null || environment === undefined || environment === 'undefined') {
