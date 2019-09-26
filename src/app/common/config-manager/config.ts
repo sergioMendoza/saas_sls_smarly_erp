@@ -1,11 +1,11 @@
-import * as config from 'config';
 import * as winston from 'winston';
+import * as config from './config/default';
 
 export interface SaasEnvironmentConfig {
-    protocol: string;
-    domain: string;
-    region: string,
-    aws_account: string,
+    protocol?: string;
+    domain?: string;
+    region?: string,
+    aws_account?: string,
     port: {
         auth: number,
         user: number,
@@ -13,7 +13,7 @@ export interface SaasEnvironmentConfig {
         reg: number,
         sys: number
     },
-    role: {
+    role?: {
         sns: string
     },
     name: {
@@ -88,9 +88,9 @@ export interface SaasConfig {
     };
 }
 
-const prod: SaasEnvironmentConfig = config.get('Config.prod');
+const prod: SaasEnvironmentConfig = config.default.Config.prod;
 
-const dev: SaasEnvironmentConfig = config.get('Config.dev');
+const dev: SaasEnvironmentConfig = config.default.Config.dev;
 
 export const configure = (environment: string | null | undefined): SaasConfig => {
     if (environment === null || environment === undefined || environment === 'undefined') {
@@ -114,7 +114,7 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                 let port = prod.port;
                 let name = prod.name;
                 //var table = prod.table;
-                let conf:  SaasConfig = {
+                return {
                     environment: environment,
                     //web_client: process.env.WEB_CLIENT,
                     aws_region: process.env.REGION,
@@ -141,8 +141,7 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                         auth: prod.protocol + process.env.SERVICE_URL + '/auth',
                         sys: prod.protocol + process.env.SERVICE_URL + '/sys'
                     }
-                };
-                return conf
+                }
 
             }
 
@@ -152,7 +151,7 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
             let name = dev.name;
             let table = dev.table;
 
-            let conf: SaasConfig = {
+            return {
                 environment: environment,
                 aws_region: dev.region,
                 cognito_region: dev.region,
@@ -174,7 +173,6 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                     sys: dev.protocol + dev.domain + ':' + port.sys + '/sys',
                 }
             };
-            return conf; 
 
         default:
             throw `No Environment Configured. \n 
