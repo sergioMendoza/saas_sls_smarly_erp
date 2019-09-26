@@ -44,11 +44,7 @@ provider:
       Action:
         - "lambda:InvoqueFunction"
       Resource: "*"
-<<<<<<< HEAD
-    # allow accessto dynamodb base tenant
-=======
     # allow access dynamoDB base tenant
->>>>>>> fbe08eb728fd04589be492c8ee435058d2e9f841
     - Effect: "Allow"
       Action:
         - dynamodb:DescribeTable
@@ -71,34 +67,6 @@ provider:
     TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
 
 functions:
-<<<<<<< HEAD
-    hello:
-      handler: hello.hello
-      events:
-        - http:
-            method: get
-            path: hello
-    getUserPool:
-      handler: handler.getUserPool
-      events:
-        - http:
-            method: get
-            path: pool/{id}
-#           # authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
-    createUserSystem:
-      handler: handler.createUserSystem
-      events:
-        - http:
-            method: post
-            path: system
-  
-    delUserTenants:
-      handler: handler.delUserTenants
-      events:
-        - http:
-            method: delete
-            path: tenants
-=======
   getUserPool:
     handler: handler.getUserPool
     events:
@@ -118,4 +86,3 @@ functions:
       - http:
           method: delete
           path: tenants
->>>>>>> fbe08eb728fd04589be492c8ee435058d2e9f841
