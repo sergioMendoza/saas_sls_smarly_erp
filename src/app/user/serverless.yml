@@ -23,9 +23,9 @@ custom:
 
   env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
   prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
-    customDomain:
-    domainName: saas.vonallem.com
-    basePath: 'user'
+  customDomain:
+    basePath: users
+    domainName: ${self:custom.env.serviceUrl.${self:provider.stage}}
     stage: ${self:provider.stage}
     createRoute53Record: true
 
