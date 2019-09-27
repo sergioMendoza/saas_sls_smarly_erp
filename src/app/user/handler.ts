@@ -391,11 +391,8 @@ const lookupUserPoolData = (credentials, userId, tenantId, isSystemContext, call
         };
 
         // get the item from the database
-<<<<<<< HEAD
+
         dynamoManager.query(searchParams, credentials, (err, users) => {
-=======
-        dynamoManager.query(searchParams, credentials,  (err, users) => {
->>>>>>> fbe08eb728fd04589be492c8ee435058d2e9f841
             if (err) {
                 winston.error('Error getting user: ' + err.message);
                 callback(err);
@@ -415,7 +412,7 @@ const lookupUserPoolData = (credentials, userId, tenantId, isSystemContext, call
         };
 
         // get the item from the database
-        dynamoManager.getItem(searchParams, credentials,  (err, user) => {
+        dynamoManager.getItem(searchParams, credentials, (err, user) => {
             if (err) {
                 winston.error('Error getting user: ' + err.message);
                 callback(err);
@@ -448,7 +445,7 @@ export const delUserTenants: Handler = (_event, _context,) => {
             //let pool = "";
             //let i;
             // process each item in series
-            Async.eachSeries(infra,  (item, callback) => {
+            Async.eachSeries(infra, (item, callback) => {
                 // execute your logic
                 //pool += item;
 
