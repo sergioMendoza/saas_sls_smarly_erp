@@ -1,4 +1,4 @@
-import {APIGatewayProxyHandler, Handler} from 'aws-lambda';
+import {APIGatewayProxyHandler, Handler, APIGatewayEvent} from 'aws-lambda';
 // import * as uuidV4 from 'uuid/v4';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
@@ -59,34 +59,24 @@ let userSchema = {
 };
 
 
-export const getUserPool: Handler = async (event, _context) => {
+export const getUserPool: Handler = (event: APIGatewayEvent, _context, callback) => {
+   
+    winston.debug('Looking up user pool data for: ' + event.pathParameters.id);
+    //onst headers = {"Access-Control-Allow-Origin": "*"};
 
-    winston.debug('Looking up user pool data for: ' + event.queryStringParameters.id);
-    const headers = {"Access-Control-Allow-Origin": "*"};
 
     tokenManager.getSystemCredentials(
         (credentials) => {
-            lookupUserPoolData(credentials, event.queryStringParameters.id, null, true, (err, user) => {
+            lookupUserPoolData(credentials, event.pathParameters.id, null, true, (err, user) => {
                 if (err) {
-                    return {
-                        statusCode: 400,
-                        headers: headers,
-                        body: JSON.stringify({
-                            message: {error: "Error registering new system admin user"}
-                        })
-                    };
+                    callback(Error("Error registering new system admin user"));
                 } else {
-                    if (user.length == 0) return {
-                        statusCode: 400,
-                        headers: headers,
-                        body: JSON.stringify({
-                            message: {error: "User not found"}
-                        })
-                    };
-                    else return {
+                    if (user.length == 0) callback(Error("User not found"));
+                  
+                    else callback(null, {
                         statusCode: 200,
                         body: JSON.stringify(user)
-                    };
+                    });
                 }
             })
         }
