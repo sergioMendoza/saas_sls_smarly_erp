@@ -84,37 +84,32 @@ export const createTenant: Handler = (event, _context) => {
 };
 
 
-export const ListTenantSystem: Handler = (_event, _context) => {
+export const ListTenantSystem: Handler =  (_event, _context, callback) => {
+    //context.callbackWaitsForEmptyEventLoop = false
     winston.debug('Fetching all tenants required to clean up infrastructure');
 //Note: Reference Architecture not leveraging Client Certificate to secure system only endpoints. Please integrate the following endpoint with a Client Certificate.
     let credentials = {};
-    tokenManager.getSystemCredentials(function (systemCredentials) {
+    tokenManager.getSystemCredentials( (systemCredentials) => {
         credentials = systemCredentials;
         let scanParams = {
             TableName: tenantSchema.TableName,
         };
-        const headers = {"Access-Control-Allow-Origin": "*"};
+        //const headers = {"Access-Control-Allow-Origin": "*"};
 
 
         // construct the helper object
         let dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
 
-        dynamoManager.scan(scanParams, credentials, (error, tenants) => {
+        dynamoManager.scan(scanParams, credentials,  (error, tenants) => {
+           
             if (error) {
                 winston.error('Error retrieving tenants: ' + error.message);
-                return {
-                    statusCode: 400,
-                    headers: headers,
-                    body: JSON.stringify({error: "Error retrieving tenants"}
-                    )
-                };
+                callback("Error retrieving tenants");
+                
             } else {
                 winston.debug('Tenants successfully retrieved');
-                return {
-                    statusCode: 200,
-                    headers: headers,
-                    body: JSON.stringify(tenants)
-                };
+                winston.debug( 'tenants: '+JSON.stringify(tenants)); 
+                callback(null, {statusCode:200,body: JSON.stringify(tenants) });
             }
         });
     });

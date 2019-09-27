@@ -160,8 +160,12 @@ export default class DynamoDBManager {
     }
 
     scan(scanParams, credentials, callback) {
+        winston.info(credentials)
         this.getDynamoDBDocumentClient(credentials, (_error, docClient) => {
+            winston.info('scan callback.')
+            winston.info(JSON.stringify({error: _error, doc: docClient}) )
             docClient.scan(scanParams, (err, data) => {
+                winston.info('data :' + JSON.stringify(data))
                 if (err)
                     callback(err);
                 else
