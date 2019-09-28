@@ -271,6 +271,8 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "policyDocument": userPolicyTemplate
                     };
 
+                    winston.debug('userPolicyTemplate' , userPolicyParams);
+
                     return cognitoUsers.createPolicy(userPolicyParams)
                 })
                 .then((userPolicy) => {
@@ -281,6 +283,8 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "policyDocument": trustPolicyTemplate,
                         "roleName": adminRoleName
                     };
+
+                    winston.debug('adminRoleParams' , adminRoleParams);
 
                     return cognitoUsers.createRole(adminRoleParams);
                 })
@@ -293,6 +297,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "roleName": userRoleName
                     };
 
+                    winston.debug('userRoleParams' , userRoleParams);
                     return cognitoUsers.createRole(userRoleParams)
                 })
                 .then((userRole) => {
@@ -302,7 +307,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "policyDocument": trustPolicyTemplate,
                         "roleName": trustPolicyRoleName
                     };
-
+                    winston.debug('trustPolicyRoleParams' , trustPolicyRoleParams);
                     return cognitoUsers.createRole(trustPolicyRoleParams)
                 })
                 .then((trustPolicyRole) => {
@@ -311,7 +316,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         PolicyArn: createdAdminPolicy.Policy.Arn,
                         RoleName: createdAdminRole.Role.RoleName
                     };
-
+                    winston.debug('adminPolicyRoleParams' , adminPolicyRoleParams);
                     return cognitoUsers.addPolicyToRole(adminPolicyRoleParams);
                 })
                 .then(() => {
@@ -319,7 +324,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         PolicyArn: createdUserPolicy.Policy.Arn,
                         RoleName: createdUserRole.Role.RoleName
                     };
-
+                    winston.debug('userPolicyRoleParams' , userPolicyRoleParams);
                     return cognitoUsers.addPolicyToRole(userPolicyRoleParams);
                 })
                 .then(() => {
@@ -333,7 +338,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "adminRoleName": adminPolicyName,
                         "userRoleName": userPolicyName
                     };
-
+                    winston.debug('addRoleToIdentityParams' , addRoleToIdentityParams);
                     return cognitoUsers.addRoleToIdentity(addRoleToIdentityParams);
                 })
                 .then((identityRole) => {
@@ -352,6 +357,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         },
                         "addRoleToIdentity": identityRole
                     };
+                    winston.debug('returnObject' , returnObject);
                     callback(null, returnObject)
                 })
                 .catch((err) => {
