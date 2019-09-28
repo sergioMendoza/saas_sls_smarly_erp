@@ -119,8 +119,8 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                     tier: prod.tier,
                     loglevel: prod.log.level,
                     url: {
-                        tenant: prod.protocol + process.env.SERVICE_URL + '/tenant',
-                        user: prod.protocol + process.env.SERVICE_URL + '/user',
+                        tenant: prod.protocol + process.env.SERVICE_URL + '/tenants',
+                        user: prod.protocol + process.env.SERVICE_URL + '/users',
                         reg: prod.protocol + process.env.SERVICE_URL + '/reg',
                         auth: prod.protocol + process.env.SERVICE_URL + '/auth',
                         sys: prod.protocol + process.env.SERVICE_URL + '/sys'
@@ -148,8 +148,8 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                 tier: dev.tier,
                 loglevel: dev.log.level,
                 url: {
-                    tenant: dev.protocol + dev.domain + '/tenant',
-                    user: dev.protocol + dev.domain + '/user',
+                    tenant: dev.protocol + dev.domain + '/tenants',
+                    user: dev.protocol + dev.domain + '/users',
                     reg: dev.protocol + dev.domain + '/reg',
                     auth: dev.protocol + dev.domain + '/auth',
                     sys: dev.protocol + dev.domain + '/sys',

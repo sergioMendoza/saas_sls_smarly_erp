@@ -1,0 +1,6 @@
+Resources:
+  snsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: ${self:custom.env.snsTopic.${self:provider.stage}}
+      TopicName: ${self:custom.env.snsTopic.${self:provider.stage}}

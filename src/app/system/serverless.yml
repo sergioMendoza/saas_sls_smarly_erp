@@ -96,5 +96,11 @@ resources:
   # Tenant Table
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/dynamodb-tenant.yml)}
 
+  # SNS Topic
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/sns-topic.yml)}
+
+  # Roles
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/roles.yml)}
+
   # API Gateway Errors and CORS
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}

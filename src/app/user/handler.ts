@@ -60,10 +60,9 @@ let userSchema = {
 
 
 export const getUserPool: Handler = (event: APIGatewayEvent, _context, callback) => {
-   
-    winston.debug('Looking up user pool data for: ' + event.pathParameters.id);
-    //onst headers = {"Access-Control-Allow-Origin": "*"};
 
+    winston.debug('Looking up user pool data for: ' + event.pathParameters.id);
+    //const headers = {"Access-Control-Allow-Origin": "*"};
 
     tokenManager.getSystemCredentials(
         (credentials) => {
@@ -72,7 +71,7 @@ export const getUserPool: Handler = (event: APIGatewayEvent, _context, callback)
                     callback(Error("Error registering new system admin user"));
                 } else {
                     if (user.length == 0) callback(Error("User not found"));
-                  
+
                     else callback(null, {
                         statusCode: 200,
                         body: JSON.stringify(user)
@@ -133,8 +132,11 @@ const createNewUser = (credentials, userPoolId, identityPoolId, clientId, tenant
         // fill in system attributes for user (not passed in POST)
         newUser.userPoolId = userPoolId;
         newUser.tenant_id = tenantId;
-        newUser.email = newUser.userName;
+        //newUser.email = newUser.userName;
         // create the user in Cognito
+
+        winston.debug('create new user' , newUser);
+
         cognitoUsers.createUser(credentials, newUser, (err, cognitoUser) => {
             if (err)
                 reject(err);
@@ -146,6 +148,8 @@ const createNewUser = (credentials, userPoolId, identityPoolId, clientId, tenant
                 newUser.client_id = clientId;
                 newUser.tenant_id = tenantId;
                 newUser.sub = cognitoUser.User.Attributes[0].Value;
+
+                winston.debug('new user created' , newUser);
 
                 // construct the Manager object
                 let dynamoManager = new DynamoDBManager(userSchema, credentials, configuration);
@@ -201,8 +205,10 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
             winston.debug('{"Error" : "User already exists"}');
         } else {
             // create the new user
+            winston.debug('tenant_id: ' + user.tenant_id);
             cognitoUsers.createUserPool(user.tenant_id)
                 .then((poolData) => {
+                    winston.debug('poolData: ' + poolData);
                     createdUserPoolData = poolData;
 
                     let clientConfigParams = {
@@ -217,12 +223,14 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                     return cognitoUsers.createUserPoolClient(clientConfigParams);
                 })
                 .then((userPoolClientData: any) => {
+
                     createdUserPoolClient = userPoolClientData;
                     let identityPoolConfigParams: any = {
                         "ClientId": userPoolClientData.UserPoolClient.ClientId,
                         "UserPoolId": userPoolClientData.UserPoolClient.UserPoolId,
                         "Name": userPoolClientData.UserPoolClient.ClientName
                     };
+                    winston.debug('identityPoolConfigParams' , identityPoolConfigParams);
                     return cognitoUsers.createIdentityPool(identityPoolConfigParams);
                 })
                 .then((identityPoolData: any) => {
@@ -230,10 +238,11 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
 
                     // create and populate policy templates
                     trustPolicyTemplate = cognitoUsers.getTrustPolicy(identityPoolData.IdentityPoolId);
+                    winston.debug('trustPolicyTemplate' , trustPolicyTemplate);
 
                     // get the admin policy template
                     let adminPolicyTemplate = cognitoUsers.getPolicyTemplate(adminPolicyName, policyCreationParams);
-
+                    winston.debug('adminPolicyTemplate' , adminPolicyTemplate);
                     // setup policy name
                     let policyName = user.tenant_id + '-' + adminPolicyName + 'Policy';
 
@@ -371,7 +380,7 @@ const lookupUserPoolData = (credentials, userId, tenantId, isSystemContext, call
     if (isSystemContext) {
 
         // init params structure with request params
-        let searchParams = {
+        let searchParam = {
             TableName: userSchema.TableName,
             IndexName: userSchema.GlobalSecondaryIndexes[0].IndexName,
             KeyConditionExpression: "id = :id",
@@ -380,20 +389,25 @@ const lookupUserPoolData = (credentials, userId, tenantId, isSystemContext, call
             }
         };
 
+        winston.debug('search paramether one', searchParam);
+
         // get the item from the database
 
-        dynamoManager.query(searchParams, credentials, (err, users) => {
+        dynamoManager.query(searchParam, credentials, (err, users) => {
             if (err) {
-                winston.error('Error getting user: ' + err.message);
+                winston.error('Error getting user: ' + err);
                 callback(err);
             } else {
+                winston.debug('user data: ' + users);
                 if (users.length == 0) {
                     let err = new Error('No user found: ' + userId);
                     callback(err);
+                    //callback(null, []);
                 } else
                     callback(null, users[0]);
             }
         });
+
     } else {
         // if this is a tenant context, then we must get with tenant id scope
         let searchParams = {

@@ -30,14 +30,15 @@ winston.configure({
  * Register a new system admin user
  */
 export const regSystemAdmin: Handler = async (event, _context) => {
-  let tenant: Tenant = JSON.parse(event.body);
+  winston.debug('event query: ' + JSON.stringify(event));
+  //let tenant: Tenant = JSON.parse(event.body);
+  let tenant: Tenant = event.body;
   const headers = { "Access-Control-Allow-Origin": "*" };
   // Generate the tenant id for the system user
   tenant.id = 'SYSADMIN' + uuidV4();
   winston.debug('Creating system admin user, tenant id: ' + tenant.id);
   tenant.id = tenant.id.split('-').join('');
   TenantAdminManager.exists(tenant, configuration, (tenantExists) => {
-    winston.error("Error registering new system admin user");
     if (tenantExists) {
       winston.error("Error registering new system admin user");
       return {

@@ -54,7 +54,9 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "${self:custom.prefix.arn.table}/*"
+      Resource:
+        - "${self:custom.prefix.arn.table}/*"
+        - "${self:custom.prefix.arn.sns}:${self:custom.env.snsTopic.${self:provider.stage}}"
 
   environment:
     PROJECT_NAME: ${self:custom.PROJECT_NAME}

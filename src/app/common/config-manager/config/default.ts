@@ -6,7 +6,7 @@ export default {
       "region": "us-east-1",
       "aws_account": "",
       "role": {
-        "sns": ""
+        "sns": "arn:aws:iam::584350323402:role/SNSRole"
       },
       "name": {
         "auth": "Authentication Manager",

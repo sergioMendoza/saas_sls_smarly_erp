@@ -1,5 +1,6 @@
 import * as request from 'request';
 import {SaasConfig} from '../common/config-manager/config';
+import * as winston from "winston";
 
 export interface TenantAdmin {
     tenant_id: string;
@@ -57,6 +58,8 @@ export class TenantAdminManager {
             // User service REST API URL
             let regTenantUserUrl = configuration.url.user + '/system';
 
+            winston.debug('regTenantUserUrl: ' + JSON.stringify(tenantAdmin));
+
             // FIRE IN THE HOLE!!!
             request({
                 url: regTenantUserUrl,
@@ -65,10 +68,14 @@ export class TenantAdminManager {
                 headers: {"content-type": "application/json"},
                 body: tenantAdmin
             }, (error, response, body) => {
-                if (error || (response.statusCode != 200))
+
+                if (error || (response.statusCode != 200)) {
+                    winston.error('error regTenantUserUrl: ' + error);
                     reject(error);
-                else
+                } else {
+                    winston.debug('regTenantUserUrl: ' + body);
                     resolve(body);
+                }
             });
         })
     }

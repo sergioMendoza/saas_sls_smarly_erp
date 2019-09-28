@@ -76,6 +76,7 @@ export const createUser = (credentials, user, callback) => {
         if (err) {
             callback(err);
         } else {
+            winston.debug('cognito user' , cognitoUser);
             callback(null, cognitoUser);
         }
     });
@@ -287,7 +288,7 @@ export const createUserPool = (tenantId): Promise<any> => {
             ],
             SmsConfiguration: {
                 SnsCallerArn: SnsArn, /* required */
-                ExternalId: 'QuickStartTest'
+                ExternalId: 'SmartlyERP'
             },
             UserPoolTags: {
                 someKey: tenantId
@@ -298,6 +299,7 @@ export const createUserPool = (tenantId): Promise<any> => {
         // create the pool
         cognitoIdentityServiceProvider.createUserPool(params, (err, data) => {
             if (err) {
+                winston.error('error create userpool:' + err);
                 reject(err);
             } else {
                 resolve(data);
@@ -357,6 +359,7 @@ export const createUserPoolClient = (poolConfig): Promise<any> => {
             if (err) {
                 reject(err);
             } else {
+                winston.debug('createUserPoolClient: ' + data);
                 resolve(data);
             }
         });

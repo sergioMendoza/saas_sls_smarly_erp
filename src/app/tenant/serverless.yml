@@ -70,17 +70,17 @@ functions:
     events:
       - http:
           method: get
-          path: tenant/hello
+          path: hello
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
   createTenant:
     handler: handler.createTenant
     events:
       - http:
           method: post
-          path: tenant
+          path: /
   ListTenantSystem:
     handler: handler.ListTenantSystem
     events:
       - http:
           method: get
-          path: tenants/system
+          path: system

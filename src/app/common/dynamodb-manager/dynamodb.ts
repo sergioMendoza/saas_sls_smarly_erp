@@ -22,8 +22,11 @@ export default class DynamoDBManager {
     private _tableExists: boolean;
 
     constructor(tableDefinition, _credentials, _configSettings, _callback?) {
+        // winston.debug("Table definition db: " + JSON.stringify(tableDefinition));
+        winston.debug("credentials db: " + JSON.stringify(_credentials));
+        // winston.debug("config settings db: " + JSON.stringify(_configSettings));
         this.tableDefinition = tableDefinition;
-        this._tableExists = false;
+        this._tableExists = true;
     }
 
     //get tableExists(): boolean {
@@ -71,6 +74,7 @@ export default class DynamoDBManager {
             let docClient = new AWS.DynamoDB.DocumentClient(_credentials);
             let ddb = new AWS.DynamoDB(_credentials);
             if (!this._tableExists) {
+                winston.debug("docClient _tableExists: " + JSON.stringify(this._tableExists));
                 this.createTable(ddb, (error) => {
                     if (error)
                         callback(error);
@@ -80,20 +84,24 @@ export default class DynamoDBManager {
                     }
                 });
             } else
-                callback(docClient);
+                callback(null, docClient);
         } catch (error) {
             callback(error);
         }
     }
 
     query(searchParameters, credentials, callback) {
+        winston.debug('search Parameters begin:', credentials);
         this.getDynamoDBDocumentClient(credentials, (error, docClient) => {
+            let _searchParameters = searchParameters;
+            winston.debug('search query:', _searchParameters);
             if (!error) {
-                docClient.query(searchParameters, (err, data) => {
+                docClient.query(_searchParameters, (err, data) => {
                     if (err) {
                         winston.error('Unable to query. Error:', JSON.stringify(err, null, 2));
                         callback(err);
                     } else {
+                        winston.debug('data query:', data);
                         callback(null, data.Items);
                     }
                 });
@@ -160,12 +168,12 @@ export default class DynamoDBManager {
     }
 
     scan(scanParams, credentials, callback) {
-        winston.info(credentials)
+        winston.info(credentials);
         this.getDynamoDBDocumentClient(credentials, (_error, docClient) => {
-            winston.info('scan callback.')
-            winston.info(JSON.stringify({error: _error, doc: docClient}) )
+            winston.info('scan callback.');
+            winston.info(JSON.stringify({error: _error, doc: docClient}));
             docClient.scan(scanParams, (err, data) => {
-                winston.info('data :' + JSON.stringify(data))
+                winston.info('data :' + JSON.stringify(data));
                 if (err)
                     callback(err);
                 else

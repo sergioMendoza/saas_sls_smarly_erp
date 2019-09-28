@@ -1,0 +1,44 @@
+Resources:
+  mySNSRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: SNSRole
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - cognito-idp.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ${self:provider.stage}-SNSRolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: sns:publish
+                Resource: '*'
+
+  myApiAuthRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ApiAuthRole
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ${self:provider.stage}-ApiAuthPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: '*'
