@@ -1,4 +1,4 @@
-import {APIGatewayProxyHandler, Handler, APIGatewayEvent} from 'aws-lambda';
+import { APIGatewayProxyHandler, Handler, APIGatewayEvent } from 'aws-lambda';
 // import * as uuidV4 from 'uuid/v4';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
@@ -16,7 +16,7 @@ winston.configure({
         new winston.transports.Console({
             level: configuration.loglevel,
             format: winston.format.combine(
-                winston.format.colorize({all: true}),
+                winston.format.colorize({ all: true }),
                 winston.format.simple()
             )
         })
@@ -30,12 +30,12 @@ winston.configure({
 let userSchema = {
     TableName: configuration.table.user,
     KeySchema: [
-        {AttributeName: "tenant_id", KeyType: "HASH"},  //Partition key
-        {AttributeName: "id", KeyType: "RANGE"}  //Sort key
+        { AttributeName: "tenant_id", KeyType: "HASH" },  //Partition key
+        { AttributeName: "id", KeyType: "RANGE" }  //Sort key
     ],
     AttributeDefinitions: [
-        {AttributeName: "tenant_id", AttributeType: "S"},
-        {AttributeName: "id", AttributeType: "S"}
+        { AttributeName: "tenant_id", AttributeType: "S" },
+        { AttributeName: "id", AttributeType: "S" }
     ],
     ProvisionedThroughput: {
         ReadCapacityUnits: 10,
@@ -45,7 +45,7 @@ let userSchema = {
         {
             IndexName: 'UserNameIndex',
             KeySchema: [
-                {AttributeName: "id", KeyType: "HASH"}
+                { AttributeName: "id", KeyType: "HASH" }
             ],
             Projection: {
                 ProjectionType: 'ALL'
@@ -83,33 +83,29 @@ export const getUserPool: Handler = (event: APIGatewayEvent, _context, callback)
 
 };
 
-export const createUserSystem: Handler = async (event, _context) => {
+export const createUserSystem: Handler = (event, _context, callback) => {
     let user = JSON.parse(event.body);
     user.tier = configuration.tier.system;
     user.role = configuration.userRole.systemAdmin;
-    const headers = {"Access-Control-Allow-Origin": "*"};
+    //const headers = {"Access-Control-Allow-Origin": "*"};
     // get the credentials for the system user
     let credentials = {};
     tokenManager.getSystemCredentials((systemCredentials) => {
         if (systemCredentials) {
             credentials = systemCredentials;
             // provision the tenant admin and roles
-            provisionAdminUserWithRoles(user, credentials, configuration.userRole.systemAdmin, configuration.userRole.systemUser,
+            provisionAdminUserWithRoles(user, credentials, configuration.userRole.systemAdmin, 
+                configuration.userRole.systemUser,
                 (err, result) => {
                     if (err) {
-                        return {
-                            statusCode: 400,
-                            headers: headers,
-                            body: JSON.stringify({
-                                message: {error: "Error provisioning system admin user"}
-                            })
-                        };
+
+                        callback(Error("Error provisioning system admin user"));
 
                     } else {
-                        return {
+                        callback(null, {
                             statusCode: 200,
                             body: JSON.stringify(result)
-                        };
+                        });
                     }
                 });
         } else {
@@ -135,7 +131,7 @@ const createNewUser = (credentials, userPoolId, identityPoolId, clientId, tenant
         //newUser.email = newUser.userName;
         // create the user in Cognito
 
-        winston.debug('create new user' , newUser);
+        winston.debug('create new user', newUser);
 
         cognitoUsers.createUser(credentials, newUser, (err, cognitoUser) => {
             if (err)
@@ -149,7 +145,7 @@ const createNewUser = (credentials, userPoolId, identityPoolId, clientId, tenant
                 newUser.tenant_id = tenantId;
                 newUser.sub = cognitoUser.User.Attributes[0].Value;
 
-                winston.debug('new user created' , newUser);
+                winston.debug('new user created', newUser);
 
                 // construct the Manager object
                 let dynamoManager = new DynamoDBManager(userSchema, credentials, configuration);
@@ -230,7 +226,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "UserPoolId": userPoolClientData.UserPoolClient.UserPoolId,
                         "Name": userPoolClientData.UserPoolClient.ClientName
                     };
-                    winston.debug('identityPoolConfigParams' , identityPoolConfigParams);
+                    winston.debug('identityPoolConfigParams', identityPoolConfigParams);
                     return cognitoUsers.createIdentityPool(identityPoolConfigParams);
                 })
                 .then((identityPoolData: any) => {
@@ -238,11 +234,11 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
 
                     // create and populate policy templates
                     trustPolicyTemplate = cognitoUsers.getTrustPolicy(identityPoolData.IdentityPoolId);
-                    winston.debug('trustPolicyTemplate' , trustPolicyTemplate);
+                    winston.debug('trustPolicyTemplate', trustPolicyTemplate);
 
                     // get the admin policy template
                     let adminPolicyTemplate = cognitoUsers.getPolicyTemplate(adminPolicyName, policyCreationParams);
-                    winston.debug('adminPolicyTemplate' , adminPolicyTemplate);
+                    winston.debug('adminPolicyTemplate', adminPolicyTemplate);
                     // setup policy name
                     let policyName = user.tenant_id + '-' + adminPolicyName + 'Policy';
 
@@ -271,7 +267,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "policyDocument": userPolicyTemplate
                     };
 
-                    winston.debug('userPolicyTemplate' , userPolicyParams);
+                    winston.debug('userPolicyTemplate', userPolicyParams);
 
                     return cognitoUsers.createPolicy(userPolicyParams)
                 })
@@ -284,7 +280,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "roleName": adminRoleName
                     };
 
-                    winston.debug('adminRoleParams' , adminRoleParams);
+                    winston.debug('adminRoleParams', adminRoleParams);
 
                     return cognitoUsers.createRole(adminRoleParams);
                 })
@@ -297,7 +293,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "roleName": userRoleName
                     };
 
-                    winston.debug('userRoleParams' , userRoleParams);
+                    winston.debug('userRoleParams', userRoleParams);
                     return cognitoUsers.createRole(userRoleParams)
                 })
                 .then((userRole) => {
@@ -307,7 +303,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "policyDocument": trustPolicyTemplate,
                         "roleName": trustPolicyRoleName
                     };
-                    winston.debug('trustPolicyRoleParams' , trustPolicyRoleParams);
+                    winston.debug('trustPolicyRoleParams', trustPolicyRoleParams);
                     return cognitoUsers.createRole(trustPolicyRoleParams)
                 })
                 .then((trustPolicyRole) => {
@@ -316,7 +312,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         PolicyArn: createdAdminPolicy.Policy.Arn,
                         RoleName: createdAdminRole.Role.RoleName
                     };
-                    winston.debug('adminPolicyRoleParams' , adminPolicyRoleParams);
+                    winston.debug('adminPolicyRoleParams', adminPolicyRoleParams);
                     return cognitoUsers.addPolicyToRole(adminPolicyRoleParams);
                 })
                 .then(() => {
@@ -324,7 +320,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         PolicyArn: createdUserPolicy.Policy.Arn,
                         RoleName: createdUserRole.Role.RoleName
                     };
-                    winston.debug('userPolicyRoleParams' , userPolicyRoleParams);
+                    winston.debug('userPolicyRoleParams', userPolicyRoleParams);
                     return cognitoUsers.addPolicyToRole(userPolicyRoleParams);
                 })
                 .then(() => {
@@ -338,7 +334,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         "adminRoleName": adminPolicyName,
                         "userRoleName": userPolicyName
                     };
-                    winston.debug('addRoleToIdentityParams' , addRoleToIdentityParams);
+                    winston.debug('addRoleToIdentityParams', addRoleToIdentityParams);
                     return cognitoUsers.addRoleToIdentity(addRoleToIdentityParams);
                 })
                 .then((identityRole) => {
@@ -357,7 +353,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         },
                         "addRoleToIdentity": identityRole
                     };
-                    winston.debug('returnObject' , returnObject);
+                    winston.debug('returnObject', returnObject);
                     callback(null, returnObject)
                 })
                 .catch((err) => {
@@ -434,9 +430,9 @@ const lookupUserPoolData = (credentials, userId, tenantId, isSystemContext, call
 };
 
 
-export const delUserTenants: Handler = (_event, _context,) => {
+export const delUserTenants: Handler = (_event, _context, ) => {
     winston.debug('Cleaning up Identity Reference Architecture: ');
-    const headers = {"Access-Control-Allow-Origin": "*"};
+    const headers = { "Access-Control-Allow-Origin": "*" };
 
     let input = {};
     tokenManager.getInfra(input, (error, response) => {
@@ -526,7 +522,7 @@ export const delUserTenants: Handler = (_event, _context,) => {
                 return {
                     statusCode: 200,
                     headers: headers,
-                    body: JSON.stringify({message: 'Success'})
+                    body: JSON.stringify({ message: 'Success' })
                 };
             });
         }
