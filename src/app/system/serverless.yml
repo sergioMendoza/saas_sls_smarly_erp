@@ -95,6 +95,7 @@ functions:
           path: admin
           cors:
             origin: '*'
+
   delSystemAdmin:
     handler: handler.delSystemAdmin
     events:
@@ -119,4 +120,4 @@ resources:
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/roles.yml)}
 
   # API Gateway Errors and CORS
-  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}
+  # - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}

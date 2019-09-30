@@ -1,5 +1,5 @@
 import * as request from 'request';
-import {SaasConfig} from '../common/config-manager/config';
+import { SaasConfig } from '../common/config-manager/config';
 import * as winston from "winston";
 
 export interface TenantAdmin {
@@ -65,15 +65,15 @@ export class TenantAdminManager {
                 url: regTenantUserUrl,
                 method: "POST",
                 json: true,
-                headers: {"content-type": "application/json"},
+                headers: { "content-type": "application/json" },
                 body: tenantAdmin
             }, (error, response, body) => {
-
+                winston.info('retrieving tenant data...')
                 if (error || (response.statusCode != 200)) {
-                    winston.error('error regTenantUserUrl: ' + error);
+                    winston.error('error regTenantUserUrl: ' + JSON.stringify(error));
                     reject(error);
                 } else {
-                    winston.debug('regTenantUserUrl: ' + body);
+                    winston.debug('regTenantUserUrl: ' + JSON.stringify(body));
                     resolve(body);
                 }
             });
@@ -89,7 +89,7 @@ export class TenantAdminManager {
             url: userExistsUrl,
             method: "GET",
             json: true,
-            headers: {"content-type": "application/json"}
+            headers: { "content-type": "application/json" }
         }, (error, response, body) => {
             if (error) callback(false);
             else if ((response != null) && (response.statusCode == 400)) callback(false);
@@ -123,19 +123,26 @@ export class TenantAdminManager {
                 "systemSupportPolicy": tenant.systemSupportPolicy,
                 "userName": tenant.userName,
             };
+            winston.info('fire in the hole!! save tenant data...')
 
             // fire request
             request({
                 url: tenantURL,
                 method: "POST",
                 json: true,
-                headers: {"content-type": "application/json"},
+                headers: { "content-type": "application/json" },
                 body: tenantRequestData
             }, function (error, response, body) {
-                if (error || (response.statusCode != 200))
+                winston.info('responding...')
+
+                if (error || (response.statusCode != 200)) {
+                    winston.error('error: ' + JSON.stringify(error))
                     reject(error);
-                else
+                }
+                else {
+                    winston.debug('body: ' + JSON.stringify(body));
                     resolve(body);
+                }
             });
         });
     }

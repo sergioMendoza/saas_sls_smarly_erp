@@ -29,11 +29,12 @@ winston.configure({
 /**
  * Register a new system admin user
  */
-export const regSystemAdmin: Handler = async (event, _context) => {
+export const regSystemAdmin: Handler = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false
   winston.debug('event query: ' + JSON.stringify(event));
   //let tenant: Tenant = JSON.parse(event.body);
   let tenant: Tenant = JSON.parse(event.body);
-  const headers = { "Access-Control-Allow-Origin": "*" };
+  //const headers = { "Access-Control-Allow-Origin": "*" };
   // Generate the tenant id for the system user
   tenant.id = 'SYSADMIN' + uuidV4();
   winston.debug('Creating system admin user, tenant id: ' + tenant.id);
@@ -41,16 +42,13 @@ export const regSystemAdmin: Handler = async (event, _context) => {
   TenantAdminManager.exists(tenant, configuration, (tenantExists) => {
     if (tenantExists) {
       winston.error("Error registering new system admin user");
-      return {
-        statusCode: 400,
-        headers: headers,
-        body: JSON.stringify({
-          message: { error: "Error registering new system admin user" }
-        })
-      };
+      callback(new Error("[400] Error registering new system admin user"))
     } else {
+      winston.info('registering tenant...')
       TenantAdminManager.reg(tenant, configuration)
         .then((tenData) => {
+          winston.info('saving tenant data...')
+          winston.debug('tenant data: ' + JSON.stringify(tenData))
           tenant.UserPoolId = tenData.pool.UserPool.Id;
           tenant.IdentityPoolId = tenData.identityPool.IdentityPoolId;
 
@@ -65,22 +63,16 @@ export const regSystemAdmin: Handler = async (event, _context) => {
         }).then(() => {
 
           winston.debug("System admin user registered: " + tenant.id);
-          return {
+          callback(null, {
             statusCode: 201,
-            headers: headers,
             body: JSON.stringify({
-              message: { message: "System admin user " + tenant.id + " registered" }
+              message: "System admin user " + tenant.id + " registered"
             })
-          };
+          });
         }).catch((error) => {
           winston.error("Error registering new system admin user: " + error.message);
-          return {
-            statusCode: 400,
-            headers: headers,
-            body: JSON.stringify({
-              error: "Error registering system admin user: " + error.message
-            })
-          };
+          callback(new Error("[400] Error registering system admin user: " + error.message))
+
         })
     }
   });
@@ -89,35 +81,28 @@ export const regSystemAdmin: Handler = async (event, _context) => {
 /**
  * Delete all system infrastructure and tables.
  */
-export const delSystemAdmin: Handler = (_event, _context) => {
+export const delSystemAdmin: Handler = (_event, _context, callback) => {
   const headers = { "Access-Control-Allow-Origin": "*" };
   TenantAdminManager.deleteInfra(configuration, winston)
-  .then( () => {
+    .then(() => {
       winston.debug("Delete Infra");
       //CloudFormation will remove the tables. This can be uncommented if required.
       //deleteTables()
-  })
-  .then( () => {
+    })
+    .then(() => {
       winston.debug("System Infrastructure & Tables removed");
-     
-      return {
+      callback(null, {
         statusCode: 200,
         headers: headers,
         body: JSON.stringify({
           message: "System Infrastructure & Tables removed"
         })
-      };
-  })
-  .catch((_error) => {
+      })
+    })
+    .catch((_error) => {
       winston.error("Error removing system");
-      return {
-        statusCode: 400,
-        headers: headers,
-        body: JSON.stringify({
-          error: " Error removing system"
-        })
-      };
-  });
+      callback(new Error("[400] Error removing system"))
+    });
 };
 
 

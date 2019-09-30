@@ -68,9 +68,9 @@ export const getUserPool: Handler = (event: APIGatewayEvent, _context, callback)
         (credentials) => {
             lookupUserPoolData(credentials, event.pathParameters.id, null, true, (err, user) => {
                 if (err) {
-                    callback(Error("Error registering new system admin user"));
+                    callback(new Error("[400] Error registering new system admin user"));
                 } else {
-                    if (user.length == 0) callback(Error("User not found"));
+                    if (user.length == 0) callback(new Error("[400] User not found"));
 
                     else callback(null, {
                         statusCode: 200,
@@ -99,7 +99,7 @@ export const createUserSystem: Handler = (event, _context, callback) => {
                 (err, result) => {
                     if (err) {
 
-                        callback(Error("Error provisioning system admin user"));
+                        callback(new Error("[400] Error provisioning system admin user"));
 
                     } else {
                         callback(null, {
