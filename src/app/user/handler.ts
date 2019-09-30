@@ -94,7 +94,7 @@ export const createUserSystem: Handler = (event, _context, callback) => {
         if (systemCredentials) {
             credentials = systemCredentials;
             // provision the tenant admin and roles
-            provisionAdminUserWithRoles(user, credentials, configuration.userRole.systemAdmin, 
+            provisionAdminUserWithRoles(user, credentials, configuration.userRole.systemAdmin,
                 configuration.userRole.systemUser,
                 (err, result) => {
                     if (err) {
