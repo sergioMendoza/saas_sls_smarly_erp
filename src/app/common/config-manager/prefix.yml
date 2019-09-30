@@ -12,6 +12,7 @@ arn:
   ssmEnv: arn:aws:ssm:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:parameter/env/${self:provider.stage}/
   batch: arn:aws:batch:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:/v1/
   kms: arn:aws:kms:${self:provider.region}:${self:custom.env.accountId.${self:provider.stage}}:key/
+  cognito: arn:aws:cognito-sync:${self:provider.region}:{self:custom.env.accountId.${self:provider.stage}}:identitypool/
 
 # All the resources manually named should start with this prefix
 naming: ${self:service}-${self:provider.stage} 
