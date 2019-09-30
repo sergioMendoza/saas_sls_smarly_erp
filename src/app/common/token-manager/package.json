@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "amazon-cognito-identity-js-with-fetch": "^3.0.5",
     "async": "^3.1.0",
     "aws-sdk": "^2.522.0",
     "format": "^0.2.2",

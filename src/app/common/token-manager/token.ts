@@ -129,6 +129,7 @@ export const getUserPool = (userName, callback) => {
     // Create URL for user-manager request
     // let userURL = userURL + '/system/' + userName;
     let userURL = configuration.url.user + '/pool/' + userName;
+    winston.info('user URL: '+userURL);
     request({
         url: userURL,
         method: "GET",

@@ -41,6 +41,7 @@ export const regSystemAdmin: Handler = (event, context, callback) => {
   tenant.id = tenant.id.split('-').join('');
   TenantAdminManager.exists(tenant, configuration, (tenantExists) => {
     if (tenantExists) {
+      winston.error('tenant exists?')
       winston.error("Error registering new system admin user");
       callback(new Error("[400] Error registering new system admin user"))
     } else {
@@ -59,16 +60,20 @@ export const regSystemAdmin: Handler = (event, context, callback) => {
           tenant.systemAdminPolicy = tenData.policy.systemAdminPolicy;
           tenant.systemSupportPolicy = tenData.policy.systemSupportPolicy;
 
-          TenantAdminManager.saveTenantData(tenant, configuration)
-        }).then(() => {
+          TenantAdminManager.saveTenantData(tenant, configuration).then(() => {
 
-          winston.debug("System admin user registered: " + tenant.id);
-          callback(null, {
-            statusCode: 201,
-            body: JSON.stringify({
-              message: "System admin user " + tenant.id + " registered"
-            })
-          });
+            winston.debug("System admin user registered: " + tenant.id);
+            callback(null, {
+              statusCode: 201,
+              body: JSON.stringify({
+                message: "System admin user " + tenant.id + " registered"
+              })
+            });
+          }).catch((error) => {
+            winston.error("Error saving tenant system data: " + error.message);
+            callback(new Error("[400] Error saving tenant system data: " + error.message))
+  
+          })
         }).catch((error) => {
           winston.error("Error registering new system admin user: " + error.message);
           callback(new Error("[400] Error registering system admin user: " + error.message))

@@ -48,13 +48,12 @@ export const hello: APIGatewayProxyHandler = async (event, _context) => {
 };
 
 
-export const createTenant: Handler = (event, _context) => {
+export const createTenant: Handler = (event, _context, callback) => {
     let credentials: any = {};
-    const headers = {"Access-Control-Allow-Origin": "*"};
 
     tokenManager.getSystemCredentials((systemCredentials) => {
         credentials = systemCredentials;
-        let tenant = event.body;
+        let tenant = JSON.parse(event.body);
         winston.debug('Creating Tenant: ' + tenant.id);
 
         // construct the helper object
@@ -63,21 +62,15 @@ export const createTenant: Handler = (event, _context) => {
         dynamoManager.putItem(tenant, credentials, (err, tenant) => {
             if (err) {
                 winston.error('Error creating new tenant: ' + err.message);
-                return {
-                    statusCode: 400,
-                    headers: headers,
-                    body: JSON.stringify({error: "Error creating tenant"}
-                    )
-                };
+                callback(new Error('Error creating tenant'));
             } else {
                 winston.debug('Tenant ' + tenant.id + ' created');
-                return {
+                callback(null, {
                     statusCode: 200,
-                    headers: headers,
                     body: JSON.stringify({
                         message: 'success'
                     })
-                };
+                });
             }
         });
     })

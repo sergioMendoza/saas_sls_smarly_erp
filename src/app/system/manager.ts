@@ -103,8 +103,9 @@ export class TenantAdminManager {
     }
 
     static saveTenantData(tenant: Tenant, configuration: SaasConfig): Promise<any> {
-        let tenantURL: string = configuration.url.tenant;
+        
         return new Promise((resolve, reject) => {
+            let tenantURL: string = configuration.url.tenant;
             // init the tenant save request
             let tenantRequestData = {
                 "id": tenant.id,
@@ -124,7 +125,8 @@ export class TenantAdminManager {
                 "userName": tenant.userName,
             };
             winston.info('fire in the hole!! save tenant data...')
-
+            winston.debug('tenant URL: '+tenantURL)
+            winston.debug('request data : '+JSON.stringify(tenantRequestData))
             // fire request
             request({
                 url: tenantURL,
