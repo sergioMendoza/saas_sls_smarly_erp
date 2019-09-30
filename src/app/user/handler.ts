@@ -1,4 +1,4 @@
-import { APIGatewayProxyHandler, Handler, APIGatewayEvent } from 'aws-lambda';
+import {APIGatewayProxyHandler, Handler, APIGatewayEvent} from 'aws-lambda';
 // import * as uuidV4 from 'uuid/v4';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
@@ -16,7 +16,7 @@ winston.configure({
         new winston.transports.Console({
             level: configuration.loglevel,
             format: winston.format.combine(
-                winston.format.colorize({ all: true }),
+                winston.format.colorize({all: true}),
                 winston.format.simple()
             )
         })
@@ -30,12 +30,12 @@ winston.configure({
 let userSchema = {
     TableName: configuration.table.user,
     KeySchema: [
-        { AttributeName: "tenant_id", KeyType: "HASH" },  //Partition key
-        { AttributeName: "id", KeyType: "RANGE" }  //Sort key
+        {AttributeName: "tenant_id", KeyType: "HASH"},  //Partition key
+        {AttributeName: "id", KeyType: "RANGE"}  //Sort key
     ],
     AttributeDefinitions: [
-        { AttributeName: "tenant_id", AttributeType: "S" },
-        { AttributeName: "id", AttributeType: "S" }
+        {AttributeName: "tenant_id", AttributeType: "S"},
+        {AttributeName: "id", AttributeType: "S"}
     ],
     ProvisionedThroughput: {
         ReadCapacityUnits: 10,
@@ -45,7 +45,7 @@ let userSchema = {
         {
             IndexName: 'UserNameIndex',
             KeySchema: [
-                { AttributeName: "id", KeyType: "HASH" }
+                {AttributeName: "id", KeyType: "HASH"}
             ],
             Projection: {
                 ProjectionType: 'ALL'
@@ -94,7 +94,7 @@ export const createUserSystem: Handler = (event, _context, callback) => {
         if (systemCredentials) {
             credentials = systemCredentials;
             // provision the tenant admin and roles
-            provisionAdminUserWithRoles(user, credentials, configuration.userRole.systemAdmin, 
+            provisionAdminUserWithRoles(user, credentials, configuration.userRole.systemAdmin,
                 configuration.userRole.systemUser,
                 (err, result) => {
                     if (err) {
@@ -430,9 +430,9 @@ const lookupUserPoolData = (credentials, userId, tenantId, isSystemContext, call
 };
 
 
-export const delUserTenants: Handler = (_event, _context, ) => {
+export const delUserTenants: Handler = (_event, _context,) => {
     winston.debug('Cleaning up Identity Reference Architecture: ');
-    const headers = { "Access-Control-Allow-Origin": "*" };
+    const headers = {"Access-Control-Allow-Origin": "*"};
 
     let input = {};
     tokenManager.getInfra(input, (error, response) => {
@@ -522,7 +522,7 @@ export const delUserTenants: Handler = (_event, _context, ) => {
                 return {
                     statusCode: 200,
                     headers: headers,
-                    body: JSON.stringify({ message: 'Success' })
+                    body: JSON.stringify({message: 'Success'})
                 };
             });
         }
