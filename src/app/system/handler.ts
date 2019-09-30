@@ -32,7 +32,7 @@ winston.configure({
 export const regSystemAdmin: Handler = async (event, _context) => {
   winston.debug('event query: ' + JSON.stringify(event));
   //let tenant: Tenant = JSON.parse(event.body);
-  let tenant: Tenant = event.body;
+  let tenant: Tenant = JSON.parse(event.body);
   const headers = { "Access-Control-Allow-Origin": "*" };
   // Generate the tenant id for the system user
   tenant.id = 'SYSADMIN' + uuidV4();

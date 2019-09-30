@@ -12,6 +12,7 @@
     "@types/aws-sdk": "^2.7.0",
     "@types/winston": "^2.4.4",
     "aws-sdk": "^2.522.0",
+    "aws-xray-sdk": "^2.3.6",
     "format": "^0.2.2",
     "typescript": "^3.6.2",
     "winston": "^3.2.1"

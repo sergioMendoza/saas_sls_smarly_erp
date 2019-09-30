@@ -73,20 +73,25 @@ functions:
       - http:
           method: get
           path: hello
+          cors:
+            origin: '*'
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
-
   regSystemAdmin:
     handler: handler.regSystemAdmin
     events:
       - http:
           method: post
           path: admin
+          cors:
+            origin: '*'
   delSystemAdmin:
     handler: handler.delSystemAdmin
     events:
       - http:
           method: delete
           path: admin
+          cors:
+            origin: '*'
 
 # create our resources with separate cloudFormation Templates
 resources:

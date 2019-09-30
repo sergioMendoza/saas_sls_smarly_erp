@@ -172,7 +172,7 @@ export const createUserPool = (tenantId): Promise<any> => {
 
         let SnsArn = configuration.role.sns;
         //Invite Message:
-        let inviteMessage = '<img src="https://d0.awsstatic.com/partner-network/logo_apn.png" alt="AWSPartner"> <br><br>Welcome to the AWS QuickStart for SaaS Identity, featuring Cognito. <br><br>Login to the Multi-Tenant Identity Reference Architecture. <br><br>Username: {username} <br><br>Password: {####}';
+        let inviteMessage = '<img src="https://vonallem.la/assets/images/logo.svg" alt="Von Allem"> <br><br>Welcome to Future!. <br><br>Login to Smartly ERP System Administration. <br><br>Username: {username} <br><br>Password: {####}';
         let emailSubject = 'Smartly SAAS ERP';
         // init JSON structure with pool settings
         let params = {

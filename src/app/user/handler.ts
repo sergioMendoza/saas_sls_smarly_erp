@@ -84,7 +84,7 @@ export const getUserPool: Handler = (event: APIGatewayEvent, _context, callback)
 };
 
 export const createUserSystem: Handler = async (event, _context) => {
-    let user = event.body;
+    let user = JSON.parse(event.body);
     user.tier = configuration.tier.system;
     user.role = configuration.userRole.systemAdmin;
     const headers = {"Access-Control-Allow-Origin": "*"};

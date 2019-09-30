@@ -37,10 +37,13 @@ export interface Tenant {
 }
 
 export class TenantAdminManager {
-    regTenantUserUrl: string;
+    //regTenantUserUrl: string;
 
 
-    static async reg(tenant: Tenant, configuration: SaasConfig): Promise<any> {
+    static reg(tenant: Tenant, configuration: SaasConfig): Promise<any> {
+
+        let regTenantUserUrl = configuration.url.user + '/system';
+
         let tenantAdmin: TenantAdmin = {
             "tenant_id": tenant.id,
             "companyName": tenant.companyName,
@@ -54,12 +57,9 @@ export class TenantAdminManager {
             "lastName": tenant.lastName
         };
         return new Promise((resolve, reject) => {
-
             // User service REST API URL
-            let regTenantUserUrl = configuration.url.user + '/system';
-
-            winston.debug('regTenantUserUrl: ' + JSON.stringify(tenantAdmin));
-
+            winston.debug('regTenantUserUrl: ' + regTenantUserUrl);
+            winston.debug('tenant Admin: ' + JSON.stringify(tenantAdmin));
             // FIRE IN THE HOLE!!!
             request({
                 url: regTenantUserUrl,
@@ -102,11 +102,10 @@ export class TenantAdminManager {
         });
     }
 
-    static async saveTenantData(tenant: Tenant, configuration: SaasConfig): Promise<any> {
+    static saveTenantData(tenant: Tenant, configuration: SaasConfig): Promise<any> {
         let tenantURL: string = configuration.url.tenant;
         return new Promise((resolve, reject) => {
             // init the tenant save request
-
             let tenantRequestData = {
                 "id": tenant.id,
                 "companyName": tenant.companyName,
@@ -141,12 +140,9 @@ export class TenantAdminManager {
         });
     }
 
-    static async deleteInfra(configuration: SaasConfig, winston): Promise<any> {
-
+    static deleteInfra(configuration: SaasConfig, winston): Promise<any> {
         return new Promise(function (resolve, reject) {
-
             let deleteInfraUrl = configuration.url.user + '/tenants';
-
             // fire request
             request({
                 url: deleteInfraUrl,
@@ -163,5 +159,4 @@ export class TenantAdminManager {
             });
         });
     }
-
 }
