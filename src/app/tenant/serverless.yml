@@ -71,12 +71,26 @@ functions:
       - http:
           method: post
           path: /
+        cors:
+            origin: '*'
+  regTenant:
+    handler: handler.regTenant
+    events:
+      - http:
+          method: post
+          path:  reg
+          cors:
+            origin: '*'
+
   ListTenantSystem:
     handler: handler.ListTenantSystem
     events:
       - http:
           method: get
           path: system
+          cors:
+            origin: '*'
+
 #  hello:
 #    handler: handler.hello
 #    events:
