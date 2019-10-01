@@ -71,7 +71,7 @@ functions:
       - http:
           method: post
           path: /
-        cors:
+          cors:
             origin: '*'
   regTenant:
     handler: handler.regTenant
