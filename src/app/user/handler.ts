@@ -76,13 +76,16 @@ export const getUserPool: Handler = (event: APIGatewayEvent, _context, callback)
 
 };
 
+/**
+ * Provision a new system admin user
+ */
 export const createUserSystem: Handler = (event, _context, callback) => {
+
     let user = JSON.parse(event.body);
     user.tier = configuration.tier.system;
     user.role = configuration.userRole.systemAdmin;
-    //const headers = {"Access-Control-Allow-Origin": "*"};
-    // get the credentials for the system user
     let credentials = {};
+
     tokenManager.getSystemCredentials((systemCredentials) => {
         if (systemCredentials) {
             credentials = systemCredentials;
@@ -106,6 +109,36 @@ export const createUserSystem: Handler = (event, _context, callback) => {
         }
     });
 };
+
+/**
+ * Provision a new tenant admin user
+ */
+export const createUserTenant: Handler = (event, _context, callback) => {
+    let user = JSON.parse(event.body);
+    tokenManager.getSystemCredentials((systemCredentials) => {
+        if (systemCredentials) {
+            // provision the tenant admin and roles
+            provisionAdminUserWithRoles(user, systemCredentials, configuration.userRole.tenantAdmin,
+                configuration.userRole.tenantAdmin,
+                (err, result) => {
+                    if (err) {
+
+                        callback(new Error("[400] Error provisioning tenant admin user"));
+
+                    } else {
+                        callback(null, {
+                            statusCode: 200,
+                            body: JSON.stringify(result)
+                        });
+                    }
+                });
+        } else {
+            winston.debug("Error Obtaining System Credentials");
+        }
+    });
+
+};
+
 
 /**
  * Create a new user using the supplied credentials/user
