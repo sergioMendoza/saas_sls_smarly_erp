@@ -93,6 +93,14 @@ functions:
           path: system
           cors:
             origin: '*'
+  createUserTenant:
+    handler: handler.createUserTenant
+    events:
+      - http:
+          method: post
+          path: reg
+          cors:
+            origin: '*'
   delUserTenants:
     handler: handler.delUserTenants
     events:
