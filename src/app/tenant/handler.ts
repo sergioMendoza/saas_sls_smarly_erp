@@ -1,7 +1,10 @@
-import {Handler} from 'aws-lambda';
+import { Handler } from 'aws-lambda';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
 import DynamoDBManager from '../common/dynamodb-manager/dynamodb';
+import * as uuidV4 from 'uuid/v4';
+
+import { TenantAdminManager, Tenant } from './manager';
 
 import * as winston from 'winston';
 
@@ -12,7 +15,7 @@ winston.configure({
         new winston.transports.Console({
             level: configuration.loglevel,
             format: winston.format.combine(
-                winston.format.colorize({all: true}),
+                winston.format.colorize({ all: true }),
                 winston.format.simple()
             )
         })
@@ -23,10 +26,10 @@ winston.configure({
 let tenantSchema = {
     TableName: configuration.table.tenant,
     KeySchema: [
-        {AttributeName: "id", KeyType: "HASH"}  //Partition key
+        { AttributeName: "id", KeyType: "HASH" }  //Partition key
     ],
     AttributeDefinitions: [
-        {AttributeName: "id", AttributeType: "S"}
+        { AttributeName: "id", AttributeType: "S" }
     ],
     ProvisionedThroughput: {
         ReadCapacityUnits: 10,
@@ -86,8 +89,59 @@ export const ListTenantSystem: Handler = (_event, _context, callback) => {
             } else {
                 winston.debug('Tenants successfully retrieved');
                 winston.debug('tenants: ' + JSON.stringify(tenants));
-                callback(null, {statusCode: 200, body: JSON.stringify(tenants)});
+                callback(null, { statusCode: 200, body: JSON.stringify(tenants) });
             }
         });
     });
 };
+
+
+export const regTenant: Handler = (event, _context, callback) => {
+    let tenant: Tenant = JSON.parse(event.body);
+    // Generate the tenant id
+    tenant.id = 'TENANT' + uuidV4();
+    winston.debug('Creating Tenant ID: ' + tenant.id);
+    tenant.id = tenant.id.split('-').join('');
+
+    // if the tenant doesn't exist, create one
+    TenantAdminManager.exists(tenant, configuration, function (tenantExists) {
+        if (tenantExists) {
+            winston.error('tenant exists?');
+            winston.error("Error registering new tenant");
+            callback(new Error("[400] Error registering new tenant"))
+        }
+        else {
+            TenantAdminManager.reg(tenant, configuration).then( (tenData) => {
+                    //Adding Data to the Tenant Object that will be required to cleaning up all created resources for all tenants.
+                    tenant.UserPoolId = tenData.pool.UserPool.Id;
+                    tenant.IdentityPoolId = tenData.identityPool.IdentityPoolId;
+
+                    tenant.systemAdminRole = tenData.role.systemAdminRole;
+                    tenant.systemSupportRole = tenData.role.systemSupportRole;
+                    tenant.trustRole = tenData.role.trustRole;
+
+                    tenant.systemAdminPolicy = tenData.policy.systemAdminPolicy;
+                    tenant.systemSupportPolicy = tenData.policy.systemSupportPolicy;
+
+                    TenantAdminManager.saveTenantData(tenant, configuration).then(() => {
+
+                        winston.debug("Tenant registered: " + tenant.id);
+                        callback(null, {
+                            statusCode: 200,
+                            body: JSON.stringify({
+                                message: "Tenant " + tenant.id + " registered"
+                            })
+                        });
+                    }).catch((error) => {
+                        winston.error("Error registering new tenant: " + error.message);
+                        callback(new Error("[400] Error saving tenant data: " + error.message))
+
+                    });
+                })
+                .catch( (error) => {
+                    winston.error("Error registering new tenant: " + error.message);
+                    callback(new Error("[400] Error registering tenant: " + error.message));
+                });
+        }
+    });
+}
