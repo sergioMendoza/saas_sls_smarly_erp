@@ -78,15 +78,6 @@ provider:
     TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
 
 functions:
-  hello:
-    handler: handler.hello
-    events:
-      - http:
-          method: get
-          path: hello
-          cors:
-            origin: '*'
-          authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
   regSystemAdmin:
     handler: handler.regSystemAdmin
     events:

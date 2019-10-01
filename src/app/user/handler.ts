@@ -1,15 +1,13 @@
-import {APIGatewayProxyHandler, Handler, APIGatewayEvent} from 'aws-lambda';
-// import * as uuidV4 from 'uuid/v4';
+import {Handler, APIGatewayEvent} from 'aws-lambda';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
 import * as cognitoUsers from './cognito-user';
 import DynamoDBManager from '../common/dynamodb-manager/dynamodb';
 import * as Async from 'async';
+
 import * as winston from 'winston';
-// import * as request from 'request';
+
 const configuration: configModule.SaasConfig = configModule.configure(process.env.ENV);
-
-
 winston.configure({
     level: configuration.loglevel,
     transports: [
@@ -22,10 +20,6 @@ winston.configure({
         })
     ]
 });
-// const tenantUrl: string = configuration.url.tenant;
-
-// const userUrl: string = configuration.url.user;
-
 
 let userSchema = {
     TableName: configuration.table.user,
@@ -57,7 +51,6 @@ let userSchema = {
         }
     ]
 };
-
 
 export const getUserPool: Handler = (event: APIGatewayEvent, _context, callback) => {
 
@@ -252,7 +245,11 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                 })
                 .then((adminPolicy) => {
                     createdAdminPolicy = adminPolicy;
-                    return createNewUser(credentials, createdUserPoolData.UserPool.Id, createdIdentityPool.IdentityPoolId, createdUserPoolClient.UserPoolClient.ClientId, user.tenant_id, user);
+                    return createNewUser(credentials,
+                        createdUserPoolData.UserPool.Id,
+                        createdIdentityPool.IdentityPoolId,
+                        createdUserPoolClient.UserPoolClient.ClientId,
+                        user.tenant_id, user);
                 })
                 .then(() => {
                     // get the admin policy template
@@ -527,15 +524,4 @@ export const delUserTenants: Handler = (_event, _context,) => {
             });
         }
     });
-};
-
-
-export const hello: APIGatewayProxyHandler = async (event, _context) => {
-    return {
-        statusCode: 200,
-        body: JSON.stringify({
-            message: 'Go Serverless Webpack (Typescript) v1.0! Your function executed successfully!',
-            input: event,
-        }),
-    };
 };

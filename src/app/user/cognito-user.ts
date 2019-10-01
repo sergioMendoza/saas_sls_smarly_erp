@@ -76,7 +76,7 @@ export const createUser = (credentials, user, callback) => {
         if (err) {
             callback(err);
         } else {
-            winston.debug('cognito user' , cognitoUser);
+            winston.debug('cognito user', cognitoUser);
             callback(null, cognitoUser);
         }
     });

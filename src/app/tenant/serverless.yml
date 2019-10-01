@@ -65,13 +65,6 @@ provider:
     TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
 
 functions:
-  hello:
-    handler: handler.hello
-    events:
-      - http:
-          method: get
-          path: hello
-          authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
   createTenant:
     handler: handler.createTenant
     events:
@@ -84,3 +77,10 @@ functions:
       - http:
           method: get
           path: system
+#  hello:
+#    handler: handler.hello
+#    events:
+#      - http:
+#          method: get
+#          path: hello
+#          authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}

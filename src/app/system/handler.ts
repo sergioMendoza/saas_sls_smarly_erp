@@ -1,28 +1,22 @@
-import { APIGatewayProxyHandler, Handler } from 'aws-lambda';
+import {APIGatewayProxyHandler, Handler} from 'aws-lambda';
 import * as uuidV4 from 'uuid/v4';
 import * as configModule from '../common/config-manager/config';
 import * as winston from 'winston';
-// import * as request from 'request';
-import { TenantAdminManager, Tenant } from './manager';
+import {TenantAdminManager, Tenant} from './manager';
 
 
 const configuration: configModule.SaasConfig = configModule.configure(process.env.ENV);
-
-// const tenantUrl: string = configuration.url.tenant;
-
-// const userUrl: string = configuration.url.user;
-
 winston.configure({
-  level: configuration.loglevel,
-  transports: [
-    new winston.transports.Console({
-      level: configuration.loglevel,
-      format: winston.format.combine(
-        winston.format.colorize({ all: true }),
-        winston.format.simple()
-      )
-    })
-  ]
+    level: configuration.loglevel,
+    transports: [
+        new winston.transports.Console({
+            level: configuration.loglevel,
+            format: winston.format.combine(
+                winston.format.colorize({all: true}),
+                winston.format.simple()
+            )
+        })
+    ]
 });
 
 
@@ -30,93 +24,80 @@ winston.configure({
  * Register a new system admin user
  */
 export const regSystemAdmin: Handler = (event, context, callback) => {
-  context.callbackWaitsForEmptyEventLoop = false
-  winston.debug('event query: ' + JSON.stringify(event));
-  //let tenant: Tenant = JSON.parse(event.body);
-  let tenant: Tenant = JSON.parse(event.body);
-  //const headers = { "Access-Control-Allow-Origin": "*" };
-  // Generate the tenant id for the system user
-  tenant.id = 'SYSADMIN' + uuidV4();
-  winston.debug('Creating system admin user, tenant id: ' + tenant.id);
-  tenant.id = tenant.id.split('-').join('');
-  TenantAdminManager.exists(tenant, configuration, (tenantExists) => {
-    if (tenantExists) {
-      winston.error('tenant exists?')
-      winston.error("Error registering new system admin user");
-      callback(new Error("[400] Error registering new system admin user"))
-    } else {
-      winston.info('registering tenant...')
-      TenantAdminManager.reg(tenant, configuration)
-        .then((tenData) => {
-          winston.info('saving tenant data...')
-          winston.debug('tenant data: ' + JSON.stringify(tenData))
-          tenant.UserPoolId = tenData.pool.UserPool.Id;
-          tenant.IdentityPoolId = tenData.identityPool.IdentityPoolId;
+    context.callbackWaitsForEmptyEventLoop = false;
+    winston.debug('event query: ' + JSON.stringify(event));
+    let tenant: Tenant = JSON.parse(event.body);
+    // Generate the tenant id for the system user
+    tenant.id = 'SYSADMIN' + uuidV4();
+    winston.debug('Creating system admin user, tenant id: ' + tenant.id);
+    tenant.id = tenant.id.split('-').join('');
+    TenantAdminManager.exists(tenant, configuration, (tenantExists) => {
+        if (tenantExists) {
+            winston.error('tenant exists?');
+            winston.error("Error registering new system admin user");
+            callback(new Error("[400] Error registering new system admin user"))
+        } else {
+            winston.info('registering tenant...');
+            TenantAdminManager.reg(tenant, configuration)
+                .then((tenData) => {
+                    winston.info('saving tenant data...');
+                    winston.debug('tenant data: ' + JSON.stringify(tenData));
+                    tenant.UserPoolId = tenData.pool.UserPool.Id;
+                    tenant.IdentityPoolId = tenData.identityPool.IdentityPoolId;
 
-          tenant.systemAdminRole = tenData.role.systemAdminRole;
-          tenant.systemSupportRole = tenData.role.systemSupportRole;
-          tenant.trustRole = tenData.role.trustRole;
+                    tenant.systemAdminRole = tenData.role.systemAdminRole;
+                    tenant.systemSupportRole = tenData.role.systemSupportRole;
+                    tenant.trustRole = tenData.role.trustRole;
 
-          tenant.systemAdminPolicy = tenData.policy.systemAdminPolicy;
-          tenant.systemSupportPolicy = tenData.policy.systemSupportPolicy;
+                    tenant.systemAdminPolicy = tenData.policy.systemAdminPolicy;
+                    tenant.systemSupportPolicy = tenData.policy.systemSupportPolicy;
 
-          TenantAdminManager.saveTenantData(tenant, configuration).then(() => {
+                    TenantAdminManager.saveTenantData(tenant, configuration).then(() => {
 
-            winston.debug("System admin user registered: " + tenant.id);
-            callback(null, {
-              statusCode: 201,
-              body: JSON.stringify({
-                message: "System admin user " + tenant.id + " registered"
-              })
-            });
-          }).catch((error) => {
-            winston.error("Error saving tenant system data: " + error.message);
-            callback(new Error("[400] Error saving tenant system data: " + error.message))
-  
-          })
-        }).catch((error) => {
-          winston.error("Error registering new system admin user: " + error.message);
-          callback(new Error("[400] Error registering system admin user: " + error.message))
+                        winston.debug("System admin user registered: " + tenant.id);
+                        callback(null, {
+                            statusCode: 201,
+                            body: JSON.stringify({
+                                message: "System admin user " + tenant.id + " registered"
+                            })
+                        });
+                    }).catch((error) => {
+                        winston.error("Error saving tenant system data: " + error.message);
+                        callback(new Error("[400] Error saving tenant system data: " + error.message))
 
-        })
-    }
-  });
+                    })
+                }).catch((error) => {
+                winston.error("Error registering new system admin user: " + error.message);
+                callback(new Error("[400] Error registering system admin user: " + error.message))
+
+            })
+        }
+    });
 };
 
 /**
  * Delete all system infrastructure and tables.
  */
 export const delSystemAdmin: Handler = (_event, _context, callback) => {
-  const headers = { "Access-Control-Allow-Origin": "*" };
-  TenantAdminManager.deleteInfra(configuration, winston)
-    .then(() => {
-      winston.debug("Delete Infra");
-      //CloudFormation will remove the tables. This can be uncommented if required.
-      //deleteTables()
-    })
-    .then(() => {
-      winston.debug("System Infrastructure & Tables removed");
-      callback(null, {
-        statusCode: 200,
-        headers: headers,
-        body: JSON.stringify({
-          message: "System Infrastructure & Tables removed"
+    const headers = {"Access-Control-Allow-Origin": "*"};
+    TenantAdminManager.deleteInfra(configuration, winston)
+        .then(() => {
+            winston.debug("Delete Infra");
+            //CloudFormation will remove the tables. This can be uncommented if required.
+            //deleteTables()
         })
-      })
-    })
-    .catch((_error) => {
-      winston.error("Error removing system");
-      callback(new Error("[400] Error removing system"))
-    });
-};
-
-
-export const hello: APIGatewayProxyHandler = async (event, _context) => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: 'Go Serverless Webpack (Typescript) v1.0! Your function executed successfully!',
-      input: event,
-    }),
-  };
+        .then(() => {
+            winston.debug("System Infrastructure & Tables removed");
+            callback(null, {
+                statusCode: 200,
+                headers: headers,
+                body: JSON.stringify({
+                    message: "System Infrastructure & Tables removed"
+                })
+            })
+        })
+        .catch((_error) => {
+            winston.error("Error removing system");
+            callback(new Error("[400] Error removing system"))
+        });
 };
