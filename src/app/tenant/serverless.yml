@@ -97,4 +97,4 @@ functions:
 #      - http:
 #          method: get
 #          path: hello
-#          authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+#          ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}

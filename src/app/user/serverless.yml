@@ -116,8 +116,8 @@ functions:
       - http:
           path: /
           method: get
-          cors: 
-            origin: "*"
+          cors: true
+          authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
 
   getUser:
     handler: handler.getUser

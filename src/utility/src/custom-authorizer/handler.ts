@@ -14,7 +14,7 @@ export const hello: APIGatewayProxyHandler = async (event, _context) => {
     };
 };
 
-export const authorizer: CustomAuthorizerHandler = (event: CustomAuthorizerEvent, context: Context, _callback: Callback) => {
+export const authorizer: CustomAuthorizerHandler = (event: CustomAuthorizerEvent, _context: Context, callback: Callback) => {
     let token: string = event.authorizationToken;
     if (token) {
         token = token.substring(token.indexOf(' ') + 1);
@@ -27,7 +27,7 @@ export const authorizer: CustomAuthorizerHandler = (event: CustomAuthorizerEvent
     //console.log('this is my body');
     //console.log(event.body);
 
-    let decodedToken: any = decodeToken(event, context);
+    let decodedToken: any = decodeToken(event, callback);
     if (decodedToken) {
         console.log('decoded Token');
         console.log(decodedToken);
@@ -62,13 +62,14 @@ export const authorizer: CustomAuthorizerHandler = (event: CustomAuthorizerEvent
                     pems[key_id] = jwkToPem(jwk);
                 }
 
-                ValidateToken(pems, event, context)
+                ValidateToken(pems, event, callback)
             } else {
-                context.fail('error');
+                callback(new Error('error'));
             }
         });
 
     } else {
         console.log('Failed to Decode');
+        callback(new Error('Failed to Decode'));
     }
 };
