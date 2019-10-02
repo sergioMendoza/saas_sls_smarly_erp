@@ -769,7 +769,7 @@ export const delUser: Handler = (event: APIGatewayEvent, _context, callback) => 
     });
 }
 
-export const delUserTables: Handler = (event, context, callback) => {
+export const delUserTables: Handler = (_event, _context, callback) => {
 
     // Delete User Table
     cognitoUsers.deleteTable(configuration.table.user)
@@ -792,6 +792,4 @@ export const delUserTables: Handler = (event, context, callback) => {
             message: 'Initiated removal of DynamoDB Tables'
         })
     });
-
-
 }
