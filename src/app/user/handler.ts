@@ -1,8 +1,9 @@
-import {Handler, APIGatewayEvent} from 'aws-lambda';
+import { Handler, APIGatewayEvent } from 'aws-lambda';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
 import * as cognitoUsers from './cognito-user';
 import DynamoDBManager from '../common/dynamodb-manager/dynamodb';
+import {createCallbackResponse} from '../common/utils/response';
 import * as Async from 'async';
 
 import * as winston from 'winston';
@@ -14,7 +15,7 @@ winston.configure({
         new winston.transports.Console({
             level: configuration.loglevel,
             format: winston.format.combine(
-                winston.format.colorize({all: true}),
+                winston.format.colorize({ all: true }),
                 winston.format.simple()
             )
         })
@@ -24,12 +25,12 @@ winston.configure({
 let userSchema = {
     TableName: configuration.table.user,
     KeySchema: [
-        {AttributeName: "tenant_id", KeyType: "HASH"},  //Partition key
-        {AttributeName: "id", KeyType: "RANGE"}  //Sort key
+        { AttributeName: "tenant_id", KeyType: "HASH" },  //Partition key
+        { AttributeName: "id", KeyType: "RANGE" }  //Sort key
     ],
     AttributeDefinitions: [
-        {AttributeName: "tenant_id", AttributeType: "S"},
-        {AttributeName: "id", AttributeType: "S"}
+        { AttributeName: "tenant_id", AttributeType: "S" },
+        { AttributeName: "id", AttributeType: "S" }
     ],
     ProvisionedThroughput: {
         ReadCapacityUnits: 10,
@@ -39,7 +40,7 @@ let userSchema = {
         {
             IndexName: 'UserNameIndex',
             KeySchema: [
-                {AttributeName: "id", KeyType: "HASH"}
+                { AttributeName: "id", KeyType: "HASH" }
             ],
             Projection: {
                 ProjectionType: 'ALL'
@@ -61,14 +62,11 @@ export const getUserPool: Handler = (event: APIGatewayEvent, _context, callback)
         (credentials) => {
             lookupUserPoolData(credentials, event.pathParameters.id, null, true, (err, user) => {
                 if (err) {
-                    callback(new Error("[400] Error registering new system admin user"));
+                    createCallbackResponse(400, "Error registering new system admin user", callback);
                 } else {
-                    if (user.length == 0) callback(new Error("[400] User not found"));
+                    if (user.length == 0) createCallbackResponse(400, "User not found", callback);
 
-                    else callback(null, {
-                        statusCode: 200,
-                        body: JSON.stringify(user)
-                    });
+                    else createCallbackResponse(200, user, callback);
                 }
             })
         }
@@ -94,18 +92,15 @@ export const createUserSystem: Handler = (event, _context, callback) => {
                 configuration.userRole.systemUser,
                 (err, result) => {
                     if (err) {
-
-                        callback(new Error("[400] Error provisioning system admin user"));
+                        createCallbackResponse(400, "Error provisioning system admin user", callback);
 
                     } else {
-                        callback(null, {
-                            statusCode: 200,
-                            body: JSON.stringify(result)
-                        });
+                        createCallbackResponse(200, result, callback);
                     }
                 });
         } else {
             winston.debug("Error Obtaining System Credentials");
+            createCallbackResponse(400, "Error Obtaining System Credentials", callback);
         }
     });
 };
@@ -122,18 +117,15 @@ export const createUserTenant: Handler = (event, _context, callback) => {
                 configuration.userRole.tenantAdmin,
                 (err, result) => {
                     if (err) {
-
-                        callback(new Error("[400] Error provisioning tenant admin user"));
-
+                        createCallbackResponse(400, "Error provisioning tenant admin user", callback);
                     } else {
-                        callback(null, {
-                            statusCode: 200,
-                            body: JSON.stringify(result)
-                        });
+                        createCallbackResponse(200, result, callback);
                     }
                 });
         } else {
             winston.debug("Error Obtaining System Credentials");
+            createCallbackResponse(400, "Error Obtaining System Credentials", callback);
+
         }
     });
 
@@ -460,19 +452,13 @@ const lookupUserPoolData = (credentials, userId, tenantId, isSystemContext, call
 };
 
 
-export const delUserTenants: Handler = (_event, _context, _callback) => {
+export const delUserTenants: Handler = (_event, _context, callback) => {
     winston.debug('Cleaning up Identity Reference Architecture: ');
-    const headers = {"Access-Control-Allow-Origin": "*"};
-
     let input = {};
     tokenManager.getInfra(input, (error, response) => {
         // handle error first, so one less indentation later
         if (error) {
-            return {
-                statusCode: 400,
-                headers: headers,
-                body: JSON.stringify(error)
-            };
+            createCallbackResponse(400, error, callback);
         } else {
             let infra = response;
             let items = Object.keys(infra).length;
@@ -542,18 +528,10 @@ export const delUserTenants: Handler = (_event, _context, _callback) => {
                 // if err is not nil, return 400
                 if (err) {
                     winston.debug(err);
-                    return {
-                        statusCode: 400,
-                        headers: headers,
-                        body: JSON.stringify(err)
-                    };
+                    createCallbackResponse(400, err, callback);
                 }
 
-                return {
-                    statusCode: 200,
-                    headers: headers,
-                    body: JSON.stringify({message: 'Success'})
-                };
+                createCallbackResponse(200, { message: 'Success' }, callback);
             });
         }
     });
@@ -580,18 +558,14 @@ export const createUser: Handler = (event, _context, callback) => {
                 createNewUser(credentials, userPoolData.UserPoolId, userPoolData.IdentityPoolId, userPoolData.client_id, user.tenant_id, user)
                     .then((_createdUser) => {
                         winston.debug('User ' + user.userName + ' created');
-
-                        callback(null, {
-                            statusCode: 200,
-                            body: JSON.stringify({status: 'success'})
-                        });
+                        createCallbackResponse(200, { status: 'success' }, callback);
                     })
                     .catch((err) => {
                         winston.error('Error creating new user in DynamoDB: ' + err.message);
-                        callback(new Error("Error creating user in DynamoDB"));
+                        createCallbackResponse(400, "Error creating user in DynamoDB", callback);
                     });
             } else {
-                callback(new Error("User pool not found"));
+                createCallbackResponse(400, "User pool not found", callback);
             }
         });
     });
@@ -612,13 +586,10 @@ export const listUser: Handler = (event, _context, callback) => {
         var userPoolId = getUserPoolIdFromRequest(event);
         cognitoUsers.getUsersFromPool(credentials, userPoolId, configuration.aws_region)
             .then((userList) => {
-                callback(null, {
-                    codeStatus: 200,
-                    body: JSON.stringify(userList)
-                });
+                createCallbackResponse(200, userList, callback);
             })
             .catch((error) => {
-                callback(new Error("Error retrieving user list: " + error.message));
+                createCallbackResponse(400, "Error retrieving user list: " + error.message, callback);
             });
     })
 }
@@ -630,16 +601,13 @@ export const getUser: Handler = (event: APIGatewayEvent, _context, callback) => 
         let tenantId = tokenManager.getTenantId(event);
 
         lookupUserPoolData(credentials, event.pathParameters.id, tenantId, false, function (err, user) {
-            if (err) callback(new Error("[400] Error getting user"));
+            if (err) createCallbackResponse(400, "Error getting user", callback);
             else {
                 cognitoUsers.getCognitoUser(credentials, user, (err, user) => {
                     if (err) {
-                        callback(new Error("[400] Error lookup user id:" + event.pathParameters.id))
+                        createCallbackResponse(400, "Error lookup user id: " + event.pathParameters.id, callback);
                     } else {
-                        callback(null, {
-                            codeStatus: 200,
-                            body: JSON.stringify(user)
-                        });
+                        createCallbackResponse(200, user, callback);
                     }
                 })
             }
@@ -665,7 +633,7 @@ const updateUserEnabledStatus = (event, enable, callback) => {
                 // update the user enabled status
                 cognitoUsers.updateUserEnabledStatus(credentials, userPool.UserPoolId, user.userName, enable)
                     .then(() => {
-                        callback(null, {status: 'success'});
+                        callback(null, { status: 'success' });
                     })
                     .catch((err) => {
                         callback(err);
@@ -678,16 +646,16 @@ const updateUserEnabledStatus = (event, enable, callback) => {
 
 export const enableUser: Handler = (event, _context, callback) => {
     updateUserEnabledStatus(event, true, (err, result) => {
-        if (err) callback(new Error('Error enabling user'));
-        else callback(null, {statusCode: 200, body: JSON.stringify(result)});
+        if (err) createCallbackResponse(400, 'Error enabling user', callback);
+        else createCallbackResponse(200,result, callback);
     });
 }
 
 
 export const disableUser: Handler = (event, _context, callback) => {
     updateUserEnabledStatus(event, false, (err, result) => {
-        if (err) callback(new Error('Error enabling user'));
-        else callback(null, {statusCode: 200, body: JSON.stringify(result)});
+        if (err) createCallbackResponse(400, 'Error disabling user', callback);
+        else createCallbackResponse(200,result, callback);
     });
 }
 
@@ -700,13 +668,10 @@ export const updateUser: Handler = (event, _context, callback) => {
         // update user data
         cognitoUsers.updateUser(credentials, user, userPoolId, configuration.aws_region)
             .then((updatedUser) => {
-                callback(null, {
-                    codeStatus: 200,
-                    body: JSON.stringify(updatedUser)
-                });
+                createCallbackResponse(200, updatedUser, callback);
             })
             .catch((err) => {
-                callback(new Error("Error updating user: " + err.message));
+                createCallbackResponse(400, "Error updating user: " + err.message, callback);
             });
     });
 }
@@ -724,7 +689,7 @@ export const delUser: Handler = (event: APIGatewayEvent, _context, callback) => 
             var userPool = userPoolData;
             // if the user pool found, proceed
             if (err) {
-                callback(new Error("User does not exist"));
+                createCallbackResponse(400,"User does not exist", callback);
             } else {
 
                 // first delete the user from Cognito
@@ -748,21 +713,18 @@ export const delUser: Handler = (event: APIGatewayEvent, _context, callback) => 
                         dynamoManager.deleteItem(deleteUserParams, credentials, function (err, _user) {
                             if (err) {
                                 winston.error('Error deleting DynamoDB user: ' + err.message);
-                                callback(new Error("Error deleting DynamoDB user"));
+                                createCallbackResponse(400,"Error deleting DynamoDB user", callback);
                             } else {
                                 winston.debug('User ' + userName + ' deleted from DynamoDB');
-                                callback(null, {
-                                    codeStatus: 200,
-                                    body: JSON.stringify({
-                                        status: 'success'
-                                    })
-                                });
+                                createCallbackResponse(200, {
+                                    status: 'success'
+                                }, callback);
                             }
                         })
                     })
                     .catch((_error) => {
                         winston.error('Error deleting Cognito user: ' + err.message);
-                        callback(new Error("Error deleting user"));
+                        createCallbackResponse(400, "Error deleting user", callback);
                     });
             }
         });
@@ -776,20 +738,17 @@ export const delUserTables: Handler = (_event, _context, callback) => {
         .then((_response) => {
         })
         .catch((err) => {
-            callback(new Error("Error deleting " + configuration.table.user + err.message));
+            createCallbackResponse(400, "Error deleting " + configuration.table.user + err.message, callback);
         });
     // Delete Tenant Table
     cognitoUsers.deleteTable(configuration.table.tenant)
         .then((_response) => {
         })
-        .catch(function (err) {
-            callback(new Error("Error deleting " + configuration.table.tenant + err.message));
+        .catch((err) => {
+            createCallbackResponse(400,"Error deleting " + configuration.table.tenant + err.message, callback);
         });
-
-    callback(null, {
-        codeStatus: 200,
-        body: JSON.stringify({
-            message: 'Initiated removal of DynamoDB Tables'
-        })
-    });
+    
+    createCallbackResponse(200, {
+        message: 'Initiated removal of DynamoDB Tables'
+    }, callback);
 }

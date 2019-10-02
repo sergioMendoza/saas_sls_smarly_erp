@@ -27,3 +27,16 @@ export const withStatusCode = (statusCode, formatter = null) => {
         return response;
     }
 };
+
+
+export const createCallbackResponse = (statusCode, body, callback) => {
+    callback(null, {
+        statusCode: statusCode,
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': true,
+        },
+        body: JSON.stringify(body) || ""
+    });
+}
