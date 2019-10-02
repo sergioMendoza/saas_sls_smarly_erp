@@ -3,7 +3,7 @@ import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
 import * as cognitoUsers from './cognito-user';
 import DynamoDBManager from '../common/dynamodb-manager/dynamodb';
-import {createCallbackResponse} from '../common/utils/response';
+import { createCallbackResponse } from '../common/utils/response';
 import * as Async from 'async';
 
 import * as winston from 'winston';
@@ -555,7 +555,8 @@ export const createUser: Handler = (event, _context, callback) => {
         lookupUserPoolData(credentials, requestingUser, user.tenant_id, false, function (err, userPoolData) {
             // if the user pool found, proceed
             if (!err) {
-                createNewUser(credentials, userPoolData.UserPoolId, userPoolData.IdentityPoolId, userPoolData.client_id, user.tenant_id, user)
+                createNewUser(credentials, userPoolData.UserPoolId, userPoolData.IdentityPoolId, userPoolData.client_id,
+                    user.tenant_id, user)
                     .then((_createdUser) => {
                         winston.debug('User ' + user.userName + ' created');
                         createCallbackResponse(200, { status: 'success' }, callback);
@@ -583,6 +584,7 @@ const getUserPoolIdFromRequest = (event) => {
 };
 export const listUser: Handler = (event, _context, callback) => {
     tokenManager.getCredentialsFromToken(event, (credentials) => {
+        winston.debug('credentials: '+ JSON.stringify(credentials));
         var userPoolId = getUserPoolIdFromRequest(event);
         cognitoUsers.getUsersFromPool(credentials, userPoolId, configuration.aws_region)
             .then((userList) => {
@@ -647,7 +649,7 @@ const updateUserEnabledStatus = (event, enable, callback) => {
 export const enableUser: Handler = (event, _context, callback) => {
     updateUserEnabledStatus(event, true, (err, result) => {
         if (err) createCallbackResponse(400, 'Error enabling user', callback);
-        else createCallbackResponse(200,result, callback);
+        else createCallbackResponse(200, result, callback);
     });
 }
 
@@ -655,7 +657,7 @@ export const enableUser: Handler = (event, _context, callback) => {
 export const disableUser: Handler = (event, _context, callback) => {
     updateUserEnabledStatus(event, false, (err, result) => {
         if (err) createCallbackResponse(400, 'Error disabling user', callback);
-        else createCallbackResponse(200,result, callback);
+        else createCallbackResponse(200, result, callback);
     });
 }
 
@@ -689,7 +691,7 @@ export const delUser: Handler = (event: APIGatewayEvent, _context, callback) => 
             var userPool = userPoolData;
             // if the user pool found, proceed
             if (err) {
-                createCallbackResponse(400,"User does not exist", callback);
+                createCallbackResponse(400, "User does not exist", callback);
             } else {
 
                 // first delete the user from Cognito
@@ -713,7 +715,7 @@ export const delUser: Handler = (event: APIGatewayEvent, _context, callback) => 
                         dynamoManager.deleteItem(deleteUserParams, credentials, function (err, _user) {
                             if (err) {
                                 winston.error('Error deleting DynamoDB user: ' + err.message);
-                                createCallbackResponse(400,"Error deleting DynamoDB user", callback);
+                                createCallbackResponse(400, "Error deleting DynamoDB user", callback);
                             } else {
                                 winston.debug('User ' + userName + ' deleted from DynamoDB');
                                 createCallbackResponse(200, {
@@ -745,9 +747,9 @@ export const delUserTables: Handler = (_event, _context, callback) => {
         .then((_response) => {
         })
         .catch((err) => {
-            createCallbackResponse(400,"Error deleting " + configuration.table.tenant + err.message, callback);
+            createCallbackResponse(400, "Error deleting " + configuration.table.tenant + err.message, callback);
         });
-    
+
     createCallbackResponse(200, {
         message: 'Initiated removal of DynamoDB Tables'
     }, callback);

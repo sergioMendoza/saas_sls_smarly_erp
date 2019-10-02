@@ -108,18 +108,23 @@ export const decodeOpenID = (bearerToken) => {
 };
 
 export const getCredentialsFromToken = (event, updateCredentials) => {
-    event.headers['Authorization']
+    tokenCache = {}
     let bearerToken = event.headers['Authorization'];
+    winston.debug('Authorization: '+JSON.stringify(bearerToken));
     if (bearerToken) {
         let tokenValue = bearerToken.substring(bearerToken.indexOf(' ') + 1);
+        winston.debug('token: '+ JSON.stringify(tokenValue));
+        winston.debug('token in cache? '+ JSON.stringify(tokenValue in tokenCache));
         if (!(tokenValue in tokenCache)) {
             let decodedIdToken = jwtDecode(tokenValue);
+            winston.debug('decoded id token: '+JSON.stringify(decodedIdToken));
             let userName = decodedIdToken['cognito:username'];
             async.waterfall([
                 (callback) => {
                     getUserPoolWithParams(userName, callback)
                 },
                 (userPool, callback) => {
+                    winston.debug('user pool: '+JSON.stringify(userPool));
                     authenticateUserInPool(userPool, tokenValue, callback)
                 }
             ], (error, results) => {
@@ -297,6 +302,7 @@ export const getId = (event, callback) => {
             /* '<IdentityProviderName>': ... */
         }
     };
+    winston.debug('getID params: ' + JSON.stringify(params))
     cognitoIdentity.getId(params, (err, data) => {
         if (err) {
             winston.debug(err.message, err.stack);

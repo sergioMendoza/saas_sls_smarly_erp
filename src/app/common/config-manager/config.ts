@@ -138,7 +138,7 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                 environment: environment,
                 aws_region: dev.region,
                 cognito_region: dev.region,
-                aws_account: dev.aws_account,
+                aws_account: process.env.AWS_ACCOUNT_ID,
                 domain: dev.domain,
                 service_url: dev.protocol + dev.domain,
                 name: name,
