@@ -22,8 +22,7 @@ custom:
     - prod
 
   env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
-  prefix:
-    ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
+  prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
   customDomain:
     basePath: sys
     domainName: ${self:custom.env.serviceUrl.${self:provider.stage}}
@@ -66,7 +65,6 @@ provider:
         - cognito-identity:*
       Resource: "*"
 
-
   environment:
     PROJECT_NAME: ${self:custom.PROJECT_NAME}
     SERVICE_URL: ${self:custom.env.serviceUrl.${self:provider.stage}}
@@ -85,7 +83,7 @@ functions:
           method: post
           path: admin
           cors:
-            origin: '*'
+            origin: "*"
 
   delSystemAdmin:
     handler: handler.delSystemAdmin
@@ -94,7 +92,48 @@ functions:
           method: delete
           path: admin
           cors:
-            origin: '*'
+            origin: "*"
+
+  delUserTables:
+    handler: handler.delUserTables
+    events:
+      - http:
+          method: delete
+          path: tables
+          cors:
+            origin: "*"
+  delUser:
+    handler: handler.delUser
+    events:
+      - http:
+          method: delete
+          path: /{id}
+          cors:
+            origin: "*"
+  updateUser:
+    handler: handler.updateUser
+    events:
+      - http:
+          method: put
+          path: /
+          cors:
+            origin: "*"
+  disableUser:
+    handler: handler.disableUser
+    events:
+      - http:
+          method: put
+          path: disable
+          cors:
+            origin: "*"
+  enableUser:
+    handler: handler.enableUser
+    events:
+      - http:
+          method: put
+          path: enable
+          cors:
+            origin: "*"
 
 # create our resources with separate cloudFormation Templates
 resources:
@@ -109,6 +148,5 @@ resources:
 
   # Roles
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/roles.yml)}
-
   # API Gateway Errors and CORS
   # - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}
