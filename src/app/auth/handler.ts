@@ -60,7 +60,11 @@ export const auth: Handler = (event, _context, callback) => {
                     });
                 },
                 onFailure: (err) => {
-                    callback(new Error('[400] ' + JSON.stringify(err)))
+                    winston.debug('on failure attributes: ' + JSON.stringify(err));
+                    callback(null, {
+                        statusCode: 400,
+                        body: JSON.stringify(err)
+                    });
                 },
                 mfaRequired: (_codeDeliveryDetails) => {
                     // MFA is required to complete user authentication.
@@ -85,17 +89,26 @@ export const auth: Handler = (event, _context, callback) => {
                     // authentication.
                     if (user.newPassword == undefined) {
                         callback(null, {
-                            statusCode: 200,
-                            body: JSON.stringify({newPasswordRequired: true})
+                            statusCode: 400,
+                            body: JSON.stringify({
+                                code: 'NewPasswordRequired',
+                                name: 'NewPasswordRequired',
+                                message: 'New password required'
+                            })
                         });
                     }
                     // These attributes are not mutable and should be removed from map.
                     delete userAttributes.email_verified;
                     delete userAttributes['custom:tenant_id'];
+
+                    winston.debug('user attributes: ' + JSON.stringify(userAttributes));
                     cognitoUser.completeNewPasswordChallenge(user.newPassword, userAttributes, cognitoCallback);
                 }
             };
+
             cognitoUser.authenticateUser(authenticationDetails, cognitoCallback);
+
+
         } else {
             winston.error("Error Authenticating User: ", error);
             callback(new Error('[404] ' + JSON.stringify(error)));

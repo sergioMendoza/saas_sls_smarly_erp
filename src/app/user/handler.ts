@@ -460,7 +460,7 @@ const lookupUserPoolData = (credentials, userId, tenantId, isSystemContext, call
 };
 
 
-export const delUserTenants: Handler = (_event, _context,) => {
+export const delUserTenants: Handler = (_event, _context, _callback) => {
     winston.debug('Cleaning up Identity Reference Architecture: ');
     const headers = {"Access-Control-Allow-Origin": "*"};
 
