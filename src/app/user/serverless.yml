@@ -84,7 +84,7 @@ functions:
           method: get
           path: pool/{id}
           cors:
-            origin: '*'
+            origin: "*"
   createUserSystem:
     handler: handler.createUserSystem
     events:
@@ -92,7 +92,7 @@ functions:
           method: post
           path: system
           cors:
-            origin: '*'
+            origin: "*"
   createUserTenant:
     handler: handler.createUserTenant
     events:
@@ -100,7 +100,34 @@ functions:
           method: post
           path: reg
           cors:
-            origin: '*'
+            origin: "*"
+  createUser:
+    handler: handler.createUser
+    events:
+      - http:
+          method: post
+          path: /
+          cors:
+            origin: "*"
+
+  listUser:
+    handler: handler.listUser
+    events:
+      - http:
+          path: /
+          method: get
+          cors: 
+            origin: "*"
+
+  getUser:
+    handler: handler.getUser
+    events:
+      - http:
+          method: get
+          path: /{id}
+          cors:
+            origin: "*"
+
   delUserTenants:
     handler: handler.delUserTenants
     events:
@@ -108,4 +135,4 @@ functions:
           method: delete
           path: tenants
           cors:
-            origin: '*'
+            origin: "*"

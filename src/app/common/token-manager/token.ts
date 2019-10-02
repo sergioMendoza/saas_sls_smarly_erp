@@ -23,6 +23,18 @@ winston.configure({
 
 let tokenCache = {};
 
+export const getTenantId = (event): string => {
+    let tenantId = '';
+    let bearerToken = event.headers['Authorization'];
+    if (bearerToken) {
+        bearerToken = bearerToken.substring(bearerToken.indexOf(' ') + 1);
+        let decodedIdToken = jwtDecode(bearerToken);
+        if (decodedIdToken)
+            tenantId = decodedIdToken['custom:tenant_id'];
+    }
+    return tenantId;
+}
+
 export const getTokenId = (req): string => {
     let tenantId = '';
     let bearerToken = req.get('Authorization');
@@ -57,15 +69,15 @@ export const getUserFullName = (idToken) => {
     return userFullName;
 };
 
-export const getRequestAuthToken = (req): string => {
+export const getRequestAuthToken = (event): string => {
     let authToken = '';
-    let authHeader = req.get('Authorization');
+    let authHeader = event.headers['Authorization'];
     if (authHeader)
         authToken = authHeader.substring(authHeader.indexOf(' ') + 1);
     return authToken;
 };
 
-export const decodeToken = function (bearerToken) {
+export const decodeToken = (bearerToken) => {
     let resultToken = {};
     if (bearerToken) {
         let decodedIdToken = jwtDecode(bearerToken);
@@ -75,7 +87,7 @@ export const decodeToken = function (bearerToken) {
     return resultToken;
 };
 
-export const checkRole = function (bearerToken) {
+export const checkRole = (bearerToken) => {
     let resultToken = {};
     if (bearerToken) {
         let decodedIdToken = jwtDecode(bearerToken);
@@ -85,7 +97,7 @@ export const checkRole = function (bearerToken) {
     return resultToken;
 };
 
-export const decodeOpenID = function (bearerToken) {
+export const decodeOpenID = (bearerToken) => {
     let resultToken = {};
     if (bearerToken) {
         let decodedIdToken = jwtDecode(bearerToken);
@@ -95,8 +107,9 @@ export const decodeOpenID = function (bearerToken) {
     return resultToken;
 };
 
-export const getCredentialsFromToken = (req, updateCredentials) => {
-    let bearerToken = req.get('Authorization');
+export const getCredentialsFromToken = (event, updateCredentials) => {
+    event.headers['Authorization']
+    let bearerToken = event.headers['Authorization'];
     if (bearerToken) {
         let tokenValue = bearerToken.substring(bearerToken.indexOf(' ') + 1);
         if (!(tokenValue in tokenCache)) {

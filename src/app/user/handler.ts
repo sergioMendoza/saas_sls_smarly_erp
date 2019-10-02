@@ -558,3 +558,240 @@ export const delUserTenants: Handler = (_event, _context, _callback) => {
         }
     });
 };
+
+
+export const createUser: Handler = (event, _context, callback) => {
+    tokenManager.getCredentialsFromToken(event, function (credentials) {
+        let user = JSON.parse(event.body);
+        winston.debug('Creating user: ' + user.userName);
+
+        // extract requesting user and role from the token
+        let authToken = tokenManager.getRequestAuthToken(event);
+        let decodedToken: any = tokenManager.decodeToken(authToken);
+        let requestingUser = decodedToken.email;
+        user.tier = decodedToken['custom:tier'];
+        user.tenant_id = decodedToken['custom:tenant_id'];
+
+        // get the user pool data using the requesting user
+        // all users added in the context of this user
+        lookupUserPoolData(credentials, requestingUser, user.tenant_id, false, function (err, userPoolData) {
+            // if the user pool found, proceed
+            if (!err) {
+                createNewUser(credentials, userPoolData.UserPoolId, userPoolData.IdentityPoolId, userPoolData.client_id, user.tenant_id, user)
+                    .then((_createdUser) => {
+                        winston.debug('User ' + user.userName + ' created');
+
+                        callback(null, {
+                            statusCode: 200,
+                            body: JSON.stringify({status: 'success'})
+                        });
+                    })
+                    .catch((err) => {
+                        winston.error('Error creating new user in DynamoDB: ' + err.message);
+                        callback(new Error("Error creating user in DynamoDB"));
+                    });
+            } else {
+                callback(new Error("User pool not found"));
+            }
+        });
+    });
+}
+
+const getUserPoolIdFromRequest = (event) => {
+    let token = event.headers['Authorization'];
+    let userPoolId;
+    let decodedToken: any = tokenManager.decodeToken(token);
+    if (decodedToken) {
+        var pool = decodedToken.iss;
+        userPoolId = pool.substring(pool.lastIndexOf("/") + 1);
+    }
+    return userPoolId;
+};
+export const listUser: Handler = (event, _context, callback) => {
+    tokenManager.getCredentialsFromToken(event, (credentials) => {
+        var userPoolId = getUserPoolIdFromRequest(event);
+        cognitoUsers.getUsersFromPool(credentials, userPoolId, configuration.aws_region)
+            .then((userList) => {
+                callback(null, {
+                    codeStatus: 200,
+                    body: JSON.stringify(userList)
+                });
+            })
+            .catch((error) => {
+                callback(new Error("Error retrieving user list: " + error.message));
+            });
+    })
+}
+
+export const getUser: Handler = (event: APIGatewayEvent, _context, callback) => {
+    winston.debug('Getting user id: ' + event.pathParameters.id);
+    tokenManager.getCredentialsFromToken(event, (credentials) => {
+        // get the tenant id from the request
+        let tenantId = tokenManager.getTenantId(event);
+
+        lookupUserPoolData(credentials, event.pathParameters.id, tenantId, false, function (err, user) {
+            if (err) callback(new Error("[400] Error getting user"));
+            else {
+                cognitoUsers.getCognitoUser(credentials, user, (err, user) => {
+                    if (err) {
+                        callback(new Error("[400] Error lookup user id:" + event.pathParameters.id))
+                    } else {
+                        callback(null, {
+                            codeStatus: 200,
+                            body: JSON.stringify(user)
+                        });
+                    }
+                })
+            }
+        });
+    });
+}
+
+const updateUserEnabledStatus = (event, enable, callback) => {
+    var user = JSON.parse(event.body);
+
+    tokenManager.getCredentialsFromToken(event, (credentials) => {
+        // get the tenant id from the request
+        var tenantId = tokenManager.getTenantId(event);
+
+        // Get additional user data required for enabled/disable
+        lookupUserPoolData(credentials, user.userName, tenantId, false, (err, userPoolData) => {
+            var userPool = userPoolData;
+
+            // if the user pool found, proceed
+            if (err) {
+                callback(err);
+            } else {
+                // update the user enabled status
+                cognitoUsers.updateUserEnabledStatus(credentials, userPool.UserPoolId, user.userName, enable)
+                    .then(() => {
+                        callback(null, {status: 'success'});
+                    })
+                    .catch((err) => {
+                        callback(err);
+                    });
+            }
+        });
+    });
+}
+
+
+export const enableUser: Handler = (event, _context, callback) => {
+    updateUserEnabledStatus(event, true, (err, result) => {
+        if (err) callback(new Error('Error enabling user'));
+        else callback(null, {statusCode: 200, body: JSON.stringify(result)});
+    });
+}
+
+
+export const disableUser: Handler = (event, _context, callback) => {
+    updateUserEnabledStatus(event, false, (err, result) => {
+        if (err) callback(new Error('Error enabling user'));
+        else callback(null, {statusCode: 200, body: JSON.stringify(result)});
+    });
+}
+
+export const updateUser: Handler = (event, _context, callback) => {
+    let user = JSON.parse(event.body);
+    tokenManager.getCredentialsFromToken(event, (credentials) => {
+        // get the user pool id from the request
+        let userPoolId = getUserPoolIdFromRequest(event);
+
+        // update user data
+        cognitoUsers.updateUser(credentials, user, userPoolId, configuration.aws_region)
+            .then((updatedUser) => {
+                callback(null, {
+                    codeStatus: 200,
+                    body: JSON.stringify(updatedUser)
+                });
+            })
+            .catch((err) => {
+                callback(new Error("Error updating user: " + err.message));
+            });
+    });
+}
+
+export const delUser: Handler = (event: APIGatewayEvent, _context, callback) => {
+    let userName = event.headers.id;
+    tokenManager.getCredentialsFromToken(event, function (credentials) {
+        winston.debug('Deleting user: ' + userName);
+
+        // get the tenant id from the request
+        let tenantId = tokenManager.getTenantId(event);
+
+        // see if the user exists in the system
+        lookupUserPoolData(credentials, userName, tenantId, false, function (err, userPoolData) {
+            var userPool = userPoolData;
+            // if the user pool found, proceed
+            if (err) {
+                callback(new Error("User does not exist"));
+            } else {
+
+                // first delete the user from Cognito
+                cognitoUsers.deleteUser(credentials, userName, userPool.UserPoolId, configuration.aws_region)
+                    .then((_result) => {
+                        winston.debug('User ' + userName + ' deleted from Cognito');
+
+                        // now delete the user from the user data base
+                        var deleteUserParams = {
+                            TableName: userSchema.TableName,
+                            Key: {
+                                id: userName,
+                                tenant_id: tenantId
+                            }
+                        };
+
+                        // construct the helper object
+                        var dynamoManager = new DynamoDBManager(userSchema, credentials, configuration);
+
+                        // delete the user from DynamoDB
+                        dynamoManager.deleteItem(deleteUserParams, credentials, function (err, _user) {
+                            if (err) {
+                                winston.error('Error deleting DynamoDB user: ' + err.message);
+                                callback(new Error("Error deleting DynamoDB user"));
+                            } else {
+                                winston.debug('User ' + userName + ' deleted from DynamoDB');
+                                callback(null, {
+                                    codeStatus: 200,
+                                    body: JSON.stringify({
+                                        status: 'success'
+                                    })
+                                });
+                            }
+                        })
+                    })
+                    .catch((_error) => {
+                        winston.error('Error deleting Cognito user: ' + err.message);
+                        callback(new Error("Error deleting user"));
+                    });
+            }
+        });
+    });
+}
+
+export const delUserTables: Handler = (event, context, callback) => {
+
+    // Delete User Table
+    cognitoUsers.deleteTable(configuration.table.user)
+        .then((_response) => {
+        })
+        .catch((err) => {
+            callback(new Error("Error deleting " + configuration.table.user + err.message));
+        });
+    // Delete Tenant Table
+    cognitoUsers.deleteTable(configuration.table.tenant)
+        .then((_response) => {
+        })
+        .catch(function (err) {
+            callback(new Error("Error deleting " + configuration.table.tenant + err.message));
+        });
+
+    callback(null, {
+        codeStatus: 200,
+        body: JSON.stringify({
+            message: 'Initiated removal of DynamoDB Tables'
+        })
+    });
+
+
+}
