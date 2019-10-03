@@ -53,7 +53,7 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "${self:custom.prefix.arn.table}/*"
-      
+
   environment:
     PROJECT_NAME: ${self:custom.PROJECT_NAME}
     SERVICE_URL: ${self:custom.env.serviceUrl.${self:provider.stage}}
@@ -65,6 +65,23 @@ provider:
     TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
 
 functions:
+  regTenant:
+    handler: handler.regTenant
+    events:
+      - http:
+          method: post
+          path: reg
+          cors:
+            origin: "*"
+
+  getTenant:
+    handler: handler.getTenant
+    events:
+      - http:
+          method: get
+          path: /{id}
+          cors:
+            origin: "*"
   createTenant:
     handler: handler.createTenant
     events:
@@ -72,15 +89,7 @@ functions:
           method: post
           path: /
           cors:
-            origin: '*'
-  regTenant:
-    handler: handler.regTenant
-    events:
-      - http:
-          method: post
-          path:  reg
-          cors:
-            origin: '*'
+            origin: "*"
 
   ListTenantSystem:
     handler: handler.ListTenantSystem
@@ -89,8 +98,34 @@ functions:
           method: get
           path: system
           cors:
-            origin: '*'
+            origin: "*"
 
+  listTenant:
+    handler: handler.listTenant
+    events:
+      - http:
+          path: /
+          method: get
+          cors:
+            origin: "*"
+
+  updateTenant:
+    handler: handler.updateTenant
+    events:
+      - http:
+          path: /
+          method: put
+          cors:
+            origin: "*"
+
+  delTenant:
+    handler: handler.delTenant
+    events:
+      - http:
+          path: /{id}
+          method: delete
+          cors:
+            origin: "*"
 #  hello:
 #    handler: handler.hello
 #    events:

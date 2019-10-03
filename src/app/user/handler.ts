@@ -602,7 +602,7 @@ export const getUser: Handler = (event: APIGatewayEvent, _context, callback) => 
         // get the tenant id from the request
         let tenantId = tokenManager.getTenantId(event);
 
-        lookupUserPoolData(credentials, event.pathParameters.id, tenantId, false, function (err, user) {
+        lookupUserPoolData(credentials, event.pathParameters.id, tenantId, false, (err, user) => {
             if (err) createCallbackResponse(400, "Error getting user", callback);
             else {
                 cognitoUsers.getCognitoUser(credentials, user, (err, user) => {

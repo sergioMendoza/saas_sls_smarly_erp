@@ -1,7 +1,8 @@
-import { Handler } from 'aws-lambda';
+import { Handler, APIGatewayEvent } from 'aws-lambda';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
 import DynamoDBManager from '../common/dynamodb-manager/dynamodb';
+import {createCallbackResponse} from'../common/utils/response';
 import * as uuidV4 from 'uuid/v4';
 
 import { TenantAdminManager, Tenant } from './manager';
@@ -143,5 +144,130 @@ export const regTenant: Handler = (event, _context, callback) => {
                     callback(new Error("[400] Error registering tenant: " + error.message));
                 });
         }
+    });
+}
+
+export const listTenant: Handler = (event, _context, callback) => {
+    winston.debug('Fetching all tenants');
+
+    tokenManager.getCredentialsFromToken(event, (credentials) => {
+        var scanParams = {
+            TableName: tenantSchema.TableName,
+        }
+
+        // construct the helper object
+        var dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
+
+        dynamoManager.scan(scanParams, credentials, (error, tenants) => {
+            if (error) {
+                winston.error('Error retrieving tenants: ' + error.message);
+                createCallbackResponse(400,{"Error" : "Error retrieving tenants"},callback );
+            }
+            else {
+                winston.debug('Tenants successfully retrieved');
+                createCallbackResponse(200, tenants, callback);
+            }
+
+        });
+    });
+}
+
+export const getTenant: Handler = (event: APIGatewayEvent, _conxtext, callback) => {
+    winston.debug('Fetching tenant: ' + event.pathParameters.id);
+
+    // init params structure with request params
+    var tenantIdParam = {
+        id: event.pathParameters.id
+    }
+
+    tokenManager.getCredentialsFromToken(event, (credentials) => {
+        // construct the helper object
+        var dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
+
+        dynamoManager.getItem(tenantIdParam, credentials, (err, tenant) => {
+            if (err) {
+                winston.error('Error getting tenant: ' + err.message);
+                createCallbackResponse(400, {"Error" : "Error getting tenant"}, callback)
+            }
+            else {
+                winston.debug('Tenant ' + event.pathParameters.id + ' retrieved');
+                createCallbackResponse(200, tenant, callback)
+            }
+        });
+    });
+}
+
+export const updateTenant: Handler = (event, _context, callback) => {
+    let tenant = JSON.parse(event.body)
+    winston.debug('Updating tenant: ' + tenant.id);
+    tokenManager.getCredentialsFromToken(event, (credentials) => {
+        // init the params from the request data
+        var keyParams = {
+            id: tenant.id
+        }
+
+        var tenantUpdateParams = {
+            TableName: tenantSchema.TableName,
+            Key: keyParams,
+            UpdateExpression: "set " +
+                "companyName=:companyName, " +
+                "accountName=:accountName, " +
+                "ownerName=:ownerName, " +
+                "tier=:tier, " +
+                "#status=:status",
+            ExpressionAttributeNames: {
+                '#status' : 'status'
+            },
+            ExpressionAttributeValues: {
+                ":companyName": tenant.companyName,
+                ":accountName": tenant.accountName,
+                ":ownerName": tenant.ownerName,
+                ":tier": tenant.tier,
+                ":status": tenant.status
+            },
+            ReturnValues:"UPDATED_NEW"
+        };
+
+        // construct the helper object
+        var dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
+
+        dynamoManager.updateItem(tenantUpdateParams, credentials, (err, updatedTenant) => {
+            if (err) {
+                winston.error('Error updating tenant: ' + err.message);
+                createCallbackResponse(400,{"Error" : "Error updating tenant"}, callback);
+            }
+            else {
+                winston.debug('Tenant ' + tenant.title + ' updated');
+                createCallbackResponse(200, updatedTenant, callback);
+            }
+        });
+    });
+}
+
+export const delTenant: Handler = (event: APIGatewayEvent, _context, callback) => {
+    winston.debug('Deleting Tenant: ' + event.pathParameters.id);
+
+    tokenManager.getCredentialsFromToken(event, (credentials) => {
+        // init parameter structure
+        var deleteTenantParams = {
+            TableName : tenantSchema.TableName,
+            Key: {
+                id: event.pathParameters.id
+            }
+        };
+
+        // construct the helper object
+        var dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
+
+        dynamoManager.deleteItem(deleteTenantParams, credentials, function (err, _result) {
+            if (err) {
+                winston.error('Error deleting tenant: ' + err.message);
+                createCallbackResponse(400, {"Error" : "Error deleting tenant"}, callback);
+            }
+            else {
+                winston.debug('Tenant ' + event.pathParameters.id + ' deleted');
+                createCallbackResponse(200, {message: 'success'}, callback);
+            }
+        });
     });
 }
