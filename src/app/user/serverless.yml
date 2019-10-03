@@ -64,6 +64,7 @@ provider:
         - cognito-idp:*
         - cognito-sync:*
         - cognito-identity:*
+        - sts:AssumeRole
       Resource: "*"
 
   environment:
@@ -134,5 +135,50 @@ functions:
       - http:
           method: delete
           path: tenants
+          cors:
+            origin: "*"
+  
+  updateUser:
+    handler: handler.updateUser
+    events:
+      - http:
+          path: /
+          method: put
+          cors:
+            origin: "*"
+  
+  enableUser:
+    handler: handler.enableUser
+    events:
+      - http:
+          path: enable
+          method: put
+          cors:
+            origin: "*"
+
+  disableUser:
+    handler: handler.disableUser
+    events:
+      - http:
+          path: disable
+          method: put
+          cors:
+            origin: "*"
+            
+  delUser:
+    handler: handler.delUser
+    events:
+      - http:
+          path: /{id}
+          method: delete
+          cors:
+            origin: "*"
+
+  delUserTables:
+    handler: handler.delUserTables
+    events:
+      - http:
+          path: tables
+          method: delete
           cors:
             origin: "*"
