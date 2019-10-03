@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import {AuthResponse, CustomAuthorizerEvent, PolicyDocument, Statement, Callback} from 'aws-lambda';
+import { AuthResponse, CustomAuthorizerEvent, PolicyDocument, Statement, Callback } from 'aws-lambda';
 
 
 export const decodeToken = (event: CustomAuthorizerEvent, callback: Callback): string | object | null => {
@@ -7,7 +7,7 @@ export const decodeToken = (event: CustomAuthorizerEvent, callback: Callback): s
     if (token) {
         token = token.substring(token.indexOf(' ') + 1);
     }
-    let decodedJwt: any = jwt.decode(token, {complete: true});
+    let decodedJwt: any = jwt.decode(token, { complete: true });
     if (!decodedJwt) {
         console.log('Not a valid JWT token');
         callback(new Error('Not a JWT Token'));
@@ -174,10 +174,10 @@ class AuthPolicy {
         }
         let doc: PolicyDocument = {
             Version: this.version,
-            Statement: [],
+            Statement: [].concat(this.getStatementsForEffect("Allow", this.allowMethods)).concat(this.getStatementsForEffect("Deny", this.denyMethods)),
         };
-        doc.Statement.concat(this.getStatementsForEffect("Allow", this.allowMethods));
-        doc.Statement.concat(this.getStatementsForEffect("Deny", this.denyMethods));
+        console.log('doc after allow')
+        console.log(JSON.stringify(doc))
 
         // authPolicy
         return {
@@ -201,7 +201,7 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
         token = token.substring(token.indexOf(' ') + 1);
     }
 
-    let decodedJwt: any = jwt.decode(token, {complete: true});
+    let decodedJwt: any = jwt.decode(token, { complete: true });
     let iss: string = decodedJwt.payload.iss;
 
     let n: number = iss.lastIndexOf('/');
@@ -233,7 +233,7 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
         console.log('Invalid access token');
         callback(new Error("Invalid access token"))
     }
-    jwt.verify(token, pem, {issuer: iss}, (err, payload) => {
+    jwt.verify(token, pem, { issuer: iss }, (err, payload) => {
         if (err) {
             callback(new Error('cannot verify signature'));
         } else {
