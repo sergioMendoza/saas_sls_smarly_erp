@@ -1,9 +1,9 @@
-import { Handler, APIGatewayEvent } from 'aws-lambda';
+import {Handler, APIGatewayEvent} from 'aws-lambda';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
 import * as cognitoUsers from './cognito-user';
 import DynamoDBManager from '../common/dynamodb-manager/dynamodb';
-import { createCallbackResponse } from '../common/utils/response';
+import {createCallbackResponse} from '../common/utils/response';
 import * as Async from 'async';
 
 import * as winston from 'winston';
@@ -15,7 +15,7 @@ winston.configure({
         new winston.transports.Console({
             level: configuration.loglevel,
             format: winston.format.combine(
-                winston.format.colorize({ all: true }),
+                winston.format.colorize({all: true}),
                 winston.format.simple()
             )
         })
@@ -25,12 +25,12 @@ winston.configure({
 let userSchema = {
     TableName: configuration.table.user,
     KeySchema: [
-        { AttributeName: "tenant_id", KeyType: "HASH" },  //Partition key
-        { AttributeName: "id", KeyType: "RANGE" }  //Sort key
+        {AttributeName: "tenant_id", KeyType: "HASH"},  //Partition key
+        {AttributeName: "id", KeyType: "RANGE"}  //Sort key
     ],
     AttributeDefinitions: [
-        { AttributeName: "tenant_id", AttributeType: "S" },
-        { AttributeName: "id", AttributeType: "S" }
+        {AttributeName: "tenant_id", AttributeType: "S"},
+        {AttributeName: "id", AttributeType: "S"}
     ],
     ProvisionedThroughput: {
         ReadCapacityUnits: 10,
@@ -40,7 +40,7 @@ let userSchema = {
         {
             IndexName: 'UserNameIndex',
             KeySchema: [
-                { AttributeName: "id", KeyType: "HASH" }
+                {AttributeName: "id", KeyType: "HASH"}
             ],
             Projection: {
                 ProjectionType: 'ALL'
@@ -189,7 +189,7 @@ const createNewUser = (credentials, userPoolId, identityPoolId, clientId, tenant
  * @param callback Returns an object with the results of the provisioned items
  */
 export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, userPolicyName, callback) => {
-    // vars that are used across multiple calls
+    // lets that are used across multiple calls
     let createdUserPoolData: any = {};
     let trustPolicyTemplate: any = {};
     let createdTrustPolicyRole: any = {};
@@ -531,7 +531,7 @@ export const delUserTenants: Handler = (_event, _context, callback) => {
                     createCallbackResponse(400, err, callback);
                 }
 
-                createCallbackResponse(200, { message: 'Success' }, callback);
+                createCallbackResponse(200, {message: 'Success'}, callback);
             });
         }
     });
@@ -559,7 +559,7 @@ export const createUser: Handler = (event, _context, callback) => {
                     user.tenant_id, user)
                     .then((_createdUser) => {
                         winston.debug('User ' + user.userName + ' created');
-                        createCallbackResponse(200, { status: 'success' }, callback);
+                        createCallbackResponse(200, {status: 'success'}, callback);
                     })
                     .catch((err) => {
                         winston.error('Error creating new user in DynamoDB: ' + err.message);
@@ -570,22 +570,22 @@ export const createUser: Handler = (event, _context, callback) => {
             }
         });
     });
-}
+};
 
 const getUserPoolIdFromRequest = (event) => {
     let token = event.headers['Authorization'];
     let userPoolId;
     let decodedToken: any = tokenManager.decodeToken(token);
     if (decodedToken) {
-        var pool = decodedToken.iss;
+        let pool = decodedToken.iss;
         userPoolId = pool.substring(pool.lastIndexOf("/") + 1);
     }
     return userPoolId;
 };
 export const listUser: Handler = (event, _context, callback) => {
     tokenManager.getCredentialsFromToken(event, (credentials) => {
-        winston.debug('credentials: '+ JSON.stringify(credentials));
-        var userPoolId = getUserPoolIdFromRequest(event);
+        winston.debug('credentials: ' + JSON.stringify(credentials));
+        let userPoolId = getUserPoolIdFromRequest(event);
         cognitoUsers.getUsersFromPool(credentials, userPoolId, configuration.aws_region)
             .then((userList) => {
                 createCallbackResponse(200, userList, callback);
@@ -594,7 +594,7 @@ export const listUser: Handler = (event, _context, callback) => {
                 createCallbackResponse(400, "Error retrieving user list: " + error.message, callback);
             });
     })
-}
+};
 
 export const getUser: Handler = (event: APIGatewayEvent, _context, callback) => {
     winston.debug('Getting user id: ' + event.pathParameters.id);
@@ -615,27 +615,26 @@ export const getUser: Handler = (event: APIGatewayEvent, _context, callback) => 
             }
         });
     });
-}
+};
 
 const updateUserEnabledStatus = (event, enable, callback) => {
-    var user = JSON.parse(event.body);
+    let user = JSON.parse(event.body);
 
     tokenManager.getCredentialsFromToken(event, (credentials) => {
         // get the tenant id from the request
-        var tenantId = tokenManager.getTenantId(event);
+        let tenantId = tokenManager.getTenantId(event);
 
         // Get additional user data required for enabled/disable
         lookupUserPoolData(credentials, user.userName, tenantId, false, (err, userPoolData) => {
-            var userPool = userPoolData;
 
             // if the user pool found, proceed
             if (err) {
                 callback(err);
             } else {
                 // update the user enabled status
-                cognitoUsers.updateUserEnabledStatus(credentials, userPool.UserPoolId, user.userName, enable)
+                cognitoUsers.updateUserEnabledStatus(credentials, userPoolData.UserPoolId, user.userName, enable)
                     .then(() => {
-                        callback(null, { status: 'success' });
+                        callback(null, {status: 'success'});
                     })
                     .catch((err) => {
                         callback(err);
@@ -643,7 +642,7 @@ const updateUserEnabledStatus = (event, enable, callback) => {
             }
         });
     });
-}
+};
 
 
 export const enableUser: Handler = (event, _context, callback) => {
@@ -651,7 +650,7 @@ export const enableUser: Handler = (event, _context, callback) => {
         if (err) createCallbackResponse(400, 'Error enabling user', callback);
         else createCallbackResponse(200, result, callback);
     });
-}
+};
 
 
 export const disableUser: Handler = (event, _context, callback) => {
@@ -659,7 +658,7 @@ export const disableUser: Handler = (event, _context, callback) => {
         if (err) createCallbackResponse(400, 'Error disabling user', callback);
         else createCallbackResponse(200, result, callback);
     });
-}
+};
 
 export const updateUser: Handler = (event, _context, callback) => {
     let user = JSON.parse(event.body);
@@ -676,7 +675,7 @@ export const updateUser: Handler = (event, _context, callback) => {
                 createCallbackResponse(400, "Error updating user: " + err.message, callback);
             });
     });
-}
+};
 
 export const delUser: Handler = (event: APIGatewayEvent, _context, callback) => {
     let userName = event.headers.id;
@@ -688,19 +687,17 @@ export const delUser: Handler = (event: APIGatewayEvent, _context, callback) => 
 
         // see if the user exists in the system
         lookupUserPoolData(credentials, userName, tenantId, false, function (err, userPoolData) {
-            var userPool = userPoolData;
             // if the user pool found, proceed
             if (err) {
                 createCallbackResponse(400, "User does not exist", callback);
             } else {
-
                 // first delete the user from Cognito
-                cognitoUsers.deleteUser(credentials, userName, userPool.UserPoolId, configuration.aws_region)
+                cognitoUsers.deleteUser(credentials, userName, userPoolData.UserPoolId, configuration.aws_region)
                     .then((_result) => {
                         winston.debug('User ' + userName + ' deleted from Cognito');
 
                         // now delete the user from the user data base
-                        var deleteUserParams = {
+                        let deleteUserParams = {
                             TableName: userSchema.TableName,
                             Key: {
                                 id: userName,
@@ -709,7 +706,7 @@ export const delUser: Handler = (event: APIGatewayEvent, _context, callback) => 
                         };
 
                         // construct the helper object
-                        var dynamoManager = new DynamoDBManager(userSchema, credentials, configuration);
+                        let dynamoManager = new DynamoDBManager(userSchema, credentials, configuration);
 
                         // delete the user from DynamoDB
                         dynamoManager.deleteItem(deleteUserParams, credentials, function (err, _user) {
@@ -731,7 +728,7 @@ export const delUser: Handler = (event: APIGatewayEvent, _context, callback) => 
             }
         });
     });
-}
+};
 
 export const delUserTables: Handler = (_event, _context, callback) => {
 
@@ -753,4 +750,4 @@ export const delUserTables: Handler = (_event, _context, callback) => {
     createCallbackResponse(200, {
         message: 'Initiated removal of DynamoDB Tables'
     }, callback);
-}
+};

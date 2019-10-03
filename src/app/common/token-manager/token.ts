@@ -108,23 +108,23 @@ export const decodeOpenID = (bearerToken) => {
 };
 
 export const getCredentialsFromToken = (event, updateCredentials) => {
-    tokenCache = {}
+    tokenCache = {};
     let bearerToken = event.headers['Authorization'];
-    winston.debug('Authorization: '+JSON.stringify(bearerToken));
+    winston.debug('Authorization: ' + JSON.stringify(bearerToken));
     if (bearerToken) {
         let tokenValue = bearerToken.substring(bearerToken.indexOf(' ') + 1);
-        winston.debug('token: '+ JSON.stringify(tokenValue));
-        winston.debug('token in cache? '+ JSON.stringify(tokenValue in tokenCache));
+        winston.debug('token: ' + JSON.stringify(tokenValue));
+        winston.debug('token in cache? ' + JSON.stringify(tokenValue in tokenCache));
         if (!(tokenValue in tokenCache)) {
             let decodedIdToken = jwtDecode(tokenValue);
-            winston.debug('decoded id token: '+JSON.stringify(decodedIdToken));
+            winston.debug('decoded id token: ' + JSON.stringify(decodedIdToken));
             let userName = decodedIdToken['cognito:username'];
             async.waterfall([
                 (callback) => {
                     getUserPoolWithParams(userName, callback)
                 },
                 (userPool, callback) => {
-                    winston.debug('user pool: '+JSON.stringify(userPool));
+                    winston.debug('user pool: ' + JSON.stringify(userPool));
                     authenticateUserInPool(userPool, tokenValue, callback)
                 }
             ], (error, results) => {
@@ -147,7 +147,7 @@ export const getUserPool = (userName, callback) => {
     // Create URL for user-manager request
     // let userURL = userURL + '/system/' + userName;
     let userURL = configuration.url.user + '/pool/' + userName;
-    winston.info('user URL: '+userURL);
+    winston.info('user URL: ' + userURL);
     request({
         url: userURL,
         method: "GET",
@@ -249,7 +249,7 @@ export const authenticateUserInPool = (userPool, idToken, callback) => {
         IdentityPoolId: userPool.IdentityPoolId
     };
     //let getIdentity =
-     getId(params, (ret, _data) => {
+    getId(params, (ret, _data) => {
         if (ret) {
             let params = {
                 token: idToken,

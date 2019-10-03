@@ -39,4 +39,4 @@ export const createCallbackResponse = (statusCode, body, callback) => {
         },
         body: JSON.stringify(body) || ""
     });
-}
+};

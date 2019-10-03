@@ -2,6 +2,7 @@ import {Handler} from 'aws-lambda';
 import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
+import {createCallbackResponse} from '../common/utils/response';
 import * as winston from 'winston';
 import fetch from 'node-fetch';
 
@@ -54,10 +55,9 @@ export const auth: Handler = (event, _context, callback) => {
                     // get the ID token
                     let idToken = result.getIdToken().getJwtToken();
                     let AccessToken = result.getAccessToken().getJwtToken();
-                    callback(null, {
-                        statusCode: 200,
-                        body: JSON.stringify({token: idToken, access: AccessToken})
-                    });
+                    createCallbackResponse(200, {token: idToken, access: AccessToken}, callback);
+
+
                 },
                 onFailure: (err) => {
                     winston.debug('on failure attributes: ' + JSON.stringify(err));
@@ -73,12 +73,7 @@ export const auth: Handler = (event, _context, callback) => {
                     let mfaCode = '';
 
                     if (user.mfaCode == undefined) {
-                        callback(null, {
-                            statusCode: 200,
-                            body: JSON.stringify({
-                                mfaRequired: true
-                            })
-                        });
+                        createCallbackResponse(400, {mfaRequired: true}, callback);
                     }
                     cognitoUser.sendMFACode(mfaCode, cognitoCallback)
 
@@ -88,14 +83,11 @@ export const auth: Handler = (event, _context, callback) => {
                     // password and required attributes, if any, to complete
                     // authentication.
                     if (user.newPassword == undefined) {
-                        callback(null, {
-                            statusCode: 400,
-                            body: JSON.stringify({
-                                code: 'NewPasswordRequired',
-                                name: 'NewPasswordRequired',
-                                message: 'New password required'
-                            })
-                        });
+                        createCallbackResponse(400, {
+                            code: 'NewPasswordRequired',
+                            name: 'NewPasswordRequired',
+                            message: 'New password required'
+                        }, callback);
                     }
                     // These attributes are not mutable and should be removed from map.
                     delete userAttributes.email_verified;
@@ -111,7 +103,7 @@ export const auth: Handler = (event, _context, callback) => {
 
         } else {
             winston.error("Error Authenticating User: ", error);
-            callback(new Error('[404] ' + JSON.stringify(error)));
+            createCallbackResponse(404, error, callback);
         }
     });
 };
