@@ -61,10 +61,7 @@ export const auth: Handler = (event, _context, callback) => {
                 },
                 onFailure: (err) => {
                     winston.debug('on failure attributes: ' + JSON.stringify(err));
-                    callback(null, {
-                        statusCode: 400,
-                        body: JSON.stringify(err)
-                    });
+                    createCallbackResponse(400, err, callback);
                 },
                 mfaRequired: (_codeDeliveryDetails) => {
                     // MFA is required to complete user authentication.

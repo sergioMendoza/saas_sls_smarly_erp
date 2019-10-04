@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import { AuthResponse, CustomAuthorizerEvent, PolicyDocument, Statement, Callback } from 'aws-lambda';
+import {AuthResponse, CustomAuthorizerEvent, PolicyDocument, Statement, Callback} from 'aws-lambda';
 
 
 export const decodeToken = (event: CustomAuthorizerEvent, callback: Callback): string | object | null => {
@@ -7,7 +7,7 @@ export const decodeToken = (event: CustomAuthorizerEvent, callback: Callback): s
     if (token) {
         token = token.substring(token.indexOf(' ') + 1);
     }
-    let decodedJwt: any = jwt.decode(token, { complete: true });
+    let decodedJwt: any = jwt.decode(token, {complete: true});
     if (!decodedJwt) {
         console.log('Not a valid JWT token');
         callback(new Error('Not a JWT Token'));
@@ -110,15 +110,15 @@ class AuthPolicy {
     }
 
     getStatementsForEffect(effect, methods): Statement[] {
-        console.log('get statments for effect:')
+        console.log('get statments for effect:');
         console.log(JSON.stringify(effect));
         console.log(JSON.stringify(methods));
         let statements: Statement[] = [];
 
         if (methods.length > 0) {
             let statement: any = AuthPolicy.getEmptyStatement(effect);
-            console.log('empty statement:')
-            console.log(JSON.stringify(statement))
+            console.log('empty statement:');
+            console.log(JSON.stringify(statement));
             for (let i = 0; i < methods.length; i++) {
                 let curMethod = methods[i];
                 if (curMethod.conditions === null || curMethod.conditions.length === 0) {
@@ -137,8 +137,8 @@ class AuthPolicy {
                 statements.push(statement);
             }
         }
-        console.log('statements: ')
-        console.log(JSON.stringify(statements))
+        console.log('statements: ');
+        console.log(JSON.stringify(statements));
 
         return statements;
     };
@@ -176,8 +176,8 @@ class AuthPolicy {
             Version: this.version,
             Statement: [].concat(this.getStatementsForEffect("Allow", this.allowMethods)).concat(this.getStatementsForEffect("Deny", this.denyMethods)),
         };
-        console.log('doc after allow')
-        console.log(JSON.stringify(doc))
+        console.log('doc after allow');
+        console.log(JSON.stringify(doc));
 
         // authPolicy
         return {
@@ -186,7 +186,6 @@ class AuthPolicy {
         };
     }
 }
-
 
 interface ApiOptions {
     region: string,
@@ -201,7 +200,7 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
         token = token.substring(token.indexOf(' ') + 1);
     }
 
-    let decodedJwt: any = jwt.decode(token, { complete: true });
+    let decodedJwt: any = jwt.decode(token, {complete: true});
     let iss: string = decodedJwt.payload.iss;
 
     let n: number = iss.lastIndexOf('/');
@@ -233,7 +232,7 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
         console.log('Invalid access token');
         callback(new Error("Invalid access token"))
     }
-    jwt.verify(token, pem, { issuer: iss }, (err, payload) => {
+    jwt.verify(token, pem, {issuer: iss}, (err, payload) => {
         if (err) {
             callback(new Error('cannot verify signature'));
         } else {
@@ -253,10 +252,10 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
                 resource += apiGatewayArnTmp[3];
             }
             */
-            console.log('authPolicy: ')
-            console.log(JSON.stringify(principalId))
-            console.log(JSON.stringify(awsAccountId))
-            console.log(JSON.stringify(apiOptions))
+            console.log('authPolicy: ');
+            console.log(JSON.stringify(principalId));
+            console.log(JSON.stringify(awsAccountId));
+            console.log(JSON.stringify(apiOptions));
             let authPolicy = new AuthPolicy(principalId, awsAccountId, apiOptions);
             authPolicy.allowAllMethods();
             const authResponse: AuthResponse = authPolicy.build();
@@ -270,8 +269,8 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
                 role: decodedJwt.payload['custom:role'],
                 userPoolId: resultUserPoolId
             };
-            console.log('auth Response:')
-            console.log(JSON.stringify(authResponse))
+            console.log('auth Response:');
+            console.log(JSON.stringify(authResponse));
             callback(null, authResponse)
 
         }
