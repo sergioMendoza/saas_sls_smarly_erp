@@ -2,7 +2,7 @@ import {Handler, APIGatewayEvent} from 'aws-lambda';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
 import DynamoDBManager from '../common/dynamodb-manager/dynamodb';
-import { createCallbackResponse } from '../common/utils/response';
+import {createCallbackResponse} from '../common/utils/response';
 import * as uuidV4 from 'uuid/v4';
 
 import {TenantAdminManager, Tenant} from './manager';
@@ -98,7 +98,7 @@ export const ListTenantSystem: Handler = (_event, _context, callback) => {
 
 
 export const regTenant: Handler = (event, context, callback) => {
-    context.callbackWaitsForEmptyEventLoop = false
+    context.callbackWaitsForEmptyEventLoop = false;
     let tenant: Tenant = JSON.parse(event.body);
     // Generate the tenant id
     tenant.id = 'TENANT' + uuidV4();
@@ -111,8 +111,7 @@ export const regTenant: Handler = (event, context, callback) => {
             winston.error('tenant exists?');
             winston.error("Error registering new tenant");
             createCallbackResponse(400, "Error registering new tenant", callback);
-        }
-        else {
+        } else {
             TenantAdminManager.reg(tenant, configuration).then((tenData) => {
                 //Adding Data to the Tenant Object that will be required to cleaning up all created resources for all tenants.
                 tenant.UserPoolId = tenData.pool.UserPool.Id;
@@ -159,9 +158,8 @@ export const listTenant: Handler = (event, _context, callback) => {
         dynamoManager.scan(scanParams, credentials, (error, tenants) => {
             if (error) {
                 winston.error('Error retrieving tenants: ' + error.message);
-                createCallbackResponse(400, { "Error": "Error retrieving tenants" }, callback);
-            }
-            else {
+                createCallbackResponse(400, {"Error": "Error retrieving tenants"}, callback);
+            } else {
                 winston.debug('Tenants successfully retrieved');
                 createCallbackResponse(200, tenants, callback);
             }
@@ -185,9 +183,8 @@ export const getTenant: Handler = (event: APIGatewayEvent, _conxtext, callback) 
         dynamoManager.getItem(tenantIdParam, credentials, (err, tenant) => {
             if (err) {
                 winston.error('Error getting tenant: ' + err.message);
-                createCallbackResponse(400, { "Error": "Error getting tenant" }, callback)
-            }
-            else {
+                createCallbackResponse(400, {"Error": "Error getting tenant"}, callback)
+            } else {
                 winston.debug('Tenant ' + event.pathParameters.id + ' retrieved');
                 createCallbackResponse(200, tenant, callback)
             }
@@ -196,7 +193,7 @@ export const getTenant: Handler = (event: APIGatewayEvent, _conxtext, callback) 
 };
 
 export const updateTenant: Handler = (event, _context, callback) => {
-    let tenant = JSON.parse(event.body)
+    let tenant = JSON.parse(event.body);
     winston.debug('Updating tenant: ' + tenant.id);
     tokenManager.getCredentialsFromToken(event, (credentials) => {
         // init the params from the request data
@@ -232,9 +229,8 @@ export const updateTenant: Handler = (event, _context, callback) => {
         dynamoManager.updateItem(tenantUpdateParams, credentials, (err, updatedTenant) => {
             if (err) {
                 winston.error('Error updating tenant: ' + err.message);
-                createCallbackResponse(400, { "Error": "Error updating tenant" }, callback);
-            }
-            else {
+                createCallbackResponse(400, {"Error": "Error updating tenant"}, callback);
+            } else {
                 winston.debug('Tenant ' + tenant.title + ' updated');
                 createCallbackResponse(200, updatedTenant, callback);
             }
@@ -260,11 +256,10 @@ export const delTenant: Handler = (event: APIGatewayEvent, _context, callback) =
         dynamoManager.deleteItem(deleteTenantParams, credentials, function (err, _result) {
             if (err) {
                 winston.error('Error deleting tenant: ' + err.message);
-                createCallbackResponse(400, { "Error": "Error deleting tenant" }, callback);
-            }
-            else {
+                createCallbackResponse(400, {"Error": "Error deleting tenant"}, callback);
+            } else {
                 winston.debug('Tenant ' + event.pathParameters.id + ' deleted');
-                createCallbackResponse(200, { message: 'success' }, callback);
+                createCallbackResponse(200, {message: 'success'}, callback);
             }
         });
     });

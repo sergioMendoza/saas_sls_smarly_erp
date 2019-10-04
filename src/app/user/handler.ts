@@ -56,8 +56,6 @@ let userSchema = {
 export const getUserPool: Handler = (event: APIGatewayEvent, _context, callback) => {
 
     winston.debug('Looking up user pool data for: ' + event.pathParameters.id);
-    //const headers = {"Access-Control-Allow-Origin": "*"};
-
     tokenManager.getSystemCredentials(
         (credentials) => {
             lookupUserPoolData(credentials, event.pathParameters.id, null, true, (err, user) => {
