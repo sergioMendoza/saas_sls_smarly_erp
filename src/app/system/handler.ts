@@ -1,4 +1,4 @@
-import {APIGatewayProxyHandler, Handler} from 'aws-lambda';
+import {Handler} from 'aws-lambda';
 import * as uuidV4 from 'uuid/v4';
 import * as configModule from '../common/config-manager/config';
 import * as winston from 'winston';

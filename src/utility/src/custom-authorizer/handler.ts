@@ -40,8 +40,8 @@ export const authorizer: CustomAuthorizerHandler = (event: CustomAuthorizerEvent
         console.log(result);
 
         //let c1: number = iss.lastIndexOf('_');
-        //let cresult: string = iss.substring(c1 - 9);
-        //let aws_region: string = cresult.substring(0, cresult.indexOf('_'));
+        //let result: string = iss.substring(c1 - 9);
+        //let aws_region: string = result.substring(0, result.indexOf('_'));
 
         //let userPoolId: string = result;
         //let region: string = aws_region;

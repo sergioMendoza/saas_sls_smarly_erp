@@ -1,11 +1,11 @@
-import { Handler, APIGatewayEvent } from 'aws-lambda';
+import {Handler, APIGatewayEvent} from 'aws-lambda';
 import * as configModule from '../common/config-manager/config';
 import * as tokenManager from '../common/token-manager/token';
 import DynamoDBManager from '../common/dynamodb-manager/dynamodb';
-import {createCallbackResponse} from'../common/utils/response';
+import {createCallbackResponse} from '../common/utils/response';
 import * as uuidV4 from 'uuid/v4';
 
-import { TenantAdminManager, Tenant } from './manager';
+import {TenantAdminManager, Tenant} from './manager';
 
 import * as winston from 'winston';
 
@@ -16,7 +16,7 @@ winston.configure({
         new winston.transports.Console({
             level: configuration.loglevel,
             format: winston.format.combine(
-                winston.format.colorize({ all: true }),
+                winston.format.colorize({all: true}),
                 winston.format.simple()
             )
         })
@@ -27,10 +27,10 @@ winston.configure({
 let tenantSchema = {
     TableName: configuration.table.tenant,
     KeySchema: [
-        { AttributeName: "id", KeyType: "HASH" }  //Partition key
+        {AttributeName: "id", KeyType: "HASH"}  //Partition key
     ],
     AttributeDefinitions: [
-        { AttributeName: "id", AttributeType: "S" }
+        {AttributeName: "id", AttributeType: "S"}
     ],
     ProvisionedThroughput: {
         ReadCapacityUnits: 10,
@@ -90,7 +90,7 @@ export const ListTenantSystem: Handler = (_event, _context, callback) => {
             } else {
                 winston.debug('Tenants successfully retrieved');
                 winston.debug('tenants: ' + JSON.stringify(tenants));
-                callback(null, { statusCode: 200, body: JSON.stringify(tenants) });
+                callback(null, {statusCode: 200, body: JSON.stringify(tenants)});
             }
         });
     });
@@ -110,103 +110,100 @@ export const regTenant: Handler = (event, _context, callback) => {
             winston.error('tenant exists?');
             winston.error("Error registering new tenant");
             callback(new Error("[400] Error registering new tenant"))
-        }
-        else {
-            TenantAdminManager.reg(tenant, configuration).then( (tenData) => {
-                    //Adding Data to the Tenant Object that will be required to cleaning up all created resources for all tenants.
-                    tenant.UserPoolId = tenData.pool.UserPool.Id;
-                    tenant.IdentityPoolId = tenData.identityPool.IdentityPoolId;
+        } else {
+            TenantAdminManager.reg(tenant, configuration).then((tenData) => {
+                //Adding Data to the Tenant Object that will be required to cleaning up all created resources for all tenants.
+                tenant.UserPoolId = tenData.pool.UserPool.Id;
+                tenant.IdentityPoolId = tenData.identityPool.IdentityPoolId;
 
-                    tenant.systemAdminRole = tenData.role.systemAdminRole;
-                    tenant.systemSupportRole = tenData.role.systemSupportRole;
-                    tenant.trustRole = tenData.role.trustRole;
+                tenant.systemAdminRole = tenData.role.systemAdminRole;
+                tenant.systemSupportRole = tenData.role.systemSupportRole;
+                tenant.trustRole = tenData.role.trustRole;
 
-                    tenant.systemAdminPolicy = tenData.policy.systemAdminPolicy;
-                    tenant.systemSupportPolicy = tenData.policy.systemSupportPolicy;
+                tenant.systemAdminPolicy = tenData.policy.systemAdminPolicy;
+                tenant.systemSupportPolicy = tenData.policy.systemSupportPolicy;
 
-                    TenantAdminManager.saveTenantData(tenant, configuration).then(() => {
+                TenantAdminManager.saveTenantData(tenant, configuration).then(() => {
 
-                        winston.debug("Tenant registered: " + tenant.id);
-                        callback(null, {
-                            statusCode: 200,
-                            body: JSON.stringify({
-                                message: "Tenant " + tenant.id + " registered"
-                            })
-                        });
-                    }).catch((error) => {
-                        winston.error("Error registering new tenant: " + error.message);
-                        callback(new Error("[400] Error saving tenant data: " + error.message))
-
+                    winston.debug("Tenant registered: " + tenant.id);
+                    callback(null, {
+                        statusCode: 200,
+                        body: JSON.stringify({
+                            message: "Tenant " + tenant.id + " registered"
+                        })
                     });
-                })
-                .catch( (error) => {
+                }).catch((error) => {
+                    winston.error("Error registering new tenant: " + error.message);
+                    callback(new Error("[400] Error saving tenant data: " + error.message))
+
+                });
+            })
+                .catch((error) => {
                     winston.error("Error registering new tenant: " + error.message);
                     callback(new Error("[400] Error registering tenant: " + error.message));
                 });
         }
     });
-}
+};
 
 export const listTenant: Handler = (event, _context, callback) => {
     winston.debug('Fetching all tenants');
 
     tokenManager.getCredentialsFromToken(event, (credentials) => {
-        var scanParams = {
+        let scanParams = {
             TableName: tenantSchema.TableName,
-        }
+        };
 
         // construct the helper object
-        var dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
+        let dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
 
         dynamoManager.scan(scanParams, credentials, (error, tenants) => {
             if (error) {
                 winston.error('Error retrieving tenants: ' + error.message);
-                createCallbackResponse(400,{"Error" : "Error retrieving tenants"},callback );
-            }
-            else {
+                createCallbackResponse(400, {"Error": "Error retrieving tenants"}, callback);
+            } else {
                 winston.debug('Tenants successfully retrieved');
                 createCallbackResponse(200, tenants, callback);
             }
 
         });
     });
-}
+};
 
 export const getTenant: Handler = (event: APIGatewayEvent, _conxtext, callback) => {
     winston.debug('Fetching tenant: ' + event.pathParameters.id);
 
     // init params structure with request params
-    var tenantIdParam = {
+    let tenantIdParam = {
         id: event.pathParameters.id
-    }
+    };
 
     tokenManager.getCredentialsFromToken(event, (credentials) => {
         // construct the helper object
-        var dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
+        let dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
 
         dynamoManager.getItem(tenantIdParam, credentials, (err, tenant) => {
             if (err) {
                 winston.error('Error getting tenant: ' + err.message);
-                createCallbackResponse(400, {"Error" : "Error getting tenant"}, callback)
-            }
-            else {
+                createCallbackResponse(400, {"Error": "Error getting tenant"}, callback)
+            } else {
                 winston.debug('Tenant ' + event.pathParameters.id + ' retrieved');
                 createCallbackResponse(200, tenant, callback)
             }
         });
     });
-}
+};
 
 export const updateTenant: Handler = (event, _context, callback) => {
     let tenant = JSON.parse(event.body)
     winston.debug('Updating tenant: ' + tenant.id);
     tokenManager.getCredentialsFromToken(event, (credentials) => {
         // init the params from the request data
-        var keyParams = {
+        let keyParams = {
             id: tenant.id
-        }
+        };
 
-        var tenantUpdateParams = {
+        let tenantUpdateParams = {
             TableName: tenantSchema.TableName,
             Key: keyParams,
             UpdateExpression: "set " +
@@ -216,7 +213,7 @@ export const updateTenant: Handler = (event, _context, callback) => {
                 "tier=:tier, " +
                 "#status=:status",
             ExpressionAttributeNames: {
-                '#status' : 'status'
+                '#status': 'status'
             },
             ExpressionAttributeValues: {
                 ":companyName": tenant.companyName,
@@ -225,49 +222,47 @@ export const updateTenant: Handler = (event, _context, callback) => {
                 ":tier": tenant.tier,
                 ":status": tenant.status
             },
-            ReturnValues:"UPDATED_NEW"
+            ReturnValues: "UPDATED_NEW"
         };
 
         // construct the helper object
-        var dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
+        let dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
 
         dynamoManager.updateItem(tenantUpdateParams, credentials, (err, updatedTenant) => {
             if (err) {
                 winston.error('Error updating tenant: ' + err.message);
-                createCallbackResponse(400,{"Error" : "Error updating tenant"}, callback);
-            }
-            else {
+                createCallbackResponse(400, {"Error": "Error updating tenant"}, callback);
+            } else {
                 winston.debug('Tenant ' + tenant.title + ' updated');
                 createCallbackResponse(200, updatedTenant, callback);
             }
         });
     });
-}
+};
 
 export const delTenant: Handler = (event: APIGatewayEvent, _context, callback) => {
     winston.debug('Deleting Tenant: ' + event.pathParameters.id);
 
     tokenManager.getCredentialsFromToken(event, (credentials) => {
         // init parameter structure
-        var deleteTenantParams = {
-            TableName : tenantSchema.TableName,
+        let deleteTenantParams = {
+            TableName: tenantSchema.TableName,
             Key: {
                 id: event.pathParameters.id
             }
         };
 
         // construct the helper object
-        var dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
+        let dynamoManager = new DynamoDBManager(tenantSchema, credentials, configuration);
 
         dynamoManager.deleteItem(deleteTenantParams, credentials, function (err, _result) {
             if (err) {
                 winston.error('Error deleting tenant: ' + err.message);
-                createCallbackResponse(400, {"Error" : "Error deleting tenant"}, callback);
-            }
-            else {
+                createCallbackResponse(400, {"Error": "Error deleting tenant"}, callback);
+            } else {
                 winston.debug('Tenant ' + event.pathParameters.id + ' deleted');
                 createCallbackResponse(200, {message: 'success'}, callback);
             }
         });
     });
-}
+};

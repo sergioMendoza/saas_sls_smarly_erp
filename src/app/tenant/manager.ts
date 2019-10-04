@@ -40,7 +40,7 @@ export class TenantAdminManager {
 
     static reg(tenant: Tenant, configuration: SaasConfig): Promise<any> {
 
-       
+
         return new Promise((resolve, reject) => {
             let regTenantUserUrl = configuration.url.user + '/reg';
 
@@ -57,8 +57,8 @@ export class TenantAdminManager {
                 "lastName": tenant.lastName
             };
             // User service REST API URL
-            winston.debug('regTenantUserUrl: ' + regTenantUserUrl);
-            winston.debug('tenant Admin: ' + JSON.stringify(tenantAdmin));
+            winston.debug('_regTenantUserUrl: ' + regTenantUserUrl);
+            winston.debug('_tenant Admin: ' + JSON.stringify(tenantAdmin));
             // FIRE IN THE HOLE!!!
             request({
                 url: regTenantUserUrl,

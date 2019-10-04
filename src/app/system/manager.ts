@@ -66,7 +66,7 @@ export class TenantAdminManager {
                 headers: {"content-type": "application/json"},
                 body: tenantAdmin
             }, (error, response, body) => {
-                winston.info('retrieving tenant data...')
+                winston.info('retrieving tenant data...');
                 if (error || (response.statusCode != 200)) {
                     winston.error('error regTenantUserUrl: ' + JSON.stringify(error));
                     reject(error);
