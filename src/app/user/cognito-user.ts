@@ -302,6 +302,7 @@ export const createUserPool = (tenantId): Promise<any> => {
                 winston.error('error create userpool:' + err);
                 reject(err);
             } else {
+                winston.debug('create pool data: ', JSON.stringify(data))
                 resolve(data);
             }
         });
@@ -359,7 +360,7 @@ export const createUserPoolClient = (poolConfig): Promise<any> => {
             if (err) {
                 reject(err);
             } else {
-                winston.debug('createUserPoolClient: ' + data);
+                winston.debug('createUserPoolClient: ' + JSON.stringify(data));
                 resolve(data);
             }
         });
@@ -500,50 +501,6 @@ export const getTenantAdminPolicy = (policyParams) => {
                 }
             },
             {
-                "Sid": "TenantAdminOrderTable",
-                "Effect": "Allow",
-                "Action": [
-                    "dynamodb:GetItem",
-                    "dynamodb:BatchGetItem",
-                    "dynamodb:Query",
-                    "dynamodb:PutItem",
-                    "dynamodb:UpdateItem",
-                    "dynamodb:DeleteItem",
-                    "dynamodb:BatchWriteItem",
-                    "dynamodb:DescribeTable",
-                    "dynamodb:CreateTable"
-
-                ],
-                "Resource": [policyParams.orderTableArn],
-                "Condition": {
-                    "ForAllValues:StringEquals": {
-                        "dynamodb:LeadingKeys": [policyParams.tenantId]
-                    }
-                }
-            },
-            {
-                "Sid": "TenantAdminProductTable",
-                "Effect": "Allow",
-                "Action": [
-                    "dynamodb:GetItem",
-                    "dynamodb:BatchGetItem",
-                    "dynamodb:Query",
-                    "dynamodb:PutItem",
-                    "dynamodb:UpdateItem",
-                    "dynamodb:DeleteItem",
-                    "dynamodb:BatchWriteItem",
-                    "dynamodb:DescribeTable",
-                    "dynamodb:CreateTable"
-
-                ],
-                "Resource": [policyParams.productTableArn],
-                "Condition": {
-                    "ForAllValues:StringEquals": {
-                        "dynamodb:LeadingKeys": [policyParams.tenantId]
-                    }
-                }
-            },
-            {
                 "Sid": "TenantCognitoAccess",
                 "Effect": "Allow",
                 "Action": [
@@ -588,46 +545,6 @@ export const getTenantUserPolicy = (policyParams) => {
                     }
                 }
 
-            },
-            {
-                "Sid": "ReadWriteOrderTable",
-                "Effect": "Allow",
-                "Action": [
-                    "dynamodb:GetItem",
-                    "dynamodb:BatchGetItem",
-                    "dynamodb:Query",
-                    "dynamodb:PutItem",
-                    "dynamodb:UpdateItem",
-                    "dynamodb:DeleteItem",
-                    "dynamodb:BatchWriteItem",
-                    "dynamodb:DescribeTable",
-                    "dynamodb:CreateTable"
-
-                ],
-                "Resource": [policyParams.orderTableArn],
-                "Condition": {
-                    "ForAllValues:StringEquals": {
-                        "dynamodb:LeadingKeys": [policyParams.tenantId]
-                    }
-                }
-            },
-            {
-                "Sid": "TenantReadOnlyProductTable",
-                "Effect": "Allow",
-                "Action": [
-                    "dynamodb:GetItem",
-                    "dynamodb:BatchGetItem",
-                    "dynamodb:Query",
-                    "dynamodb:DescribeTable",
-                    "dynamodb:CreateTable"
-
-                ],
-                "Resource": [policyParams.productTableArn],
-                "Condition": {
-                    "ForAllValues:StringEquals": {
-                        "dynamodb:LeadingKeys": [policyParams.tenantId]
-                    }
-                }
             },
             {
                 "Sid": "TenantCognitoAccess",

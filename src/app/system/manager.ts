@@ -41,7 +41,6 @@ export class TenantAdminManager {
     static reg(tenant: Tenant, configuration: SaasConfig): Promise<any> {
 
         let regTenantUserUrl = configuration.url.user + '/system';
-
         let tenantAdmin: TenantAdmin = {
             "tenant_id": tenant.id,
             "companyName": tenant.companyName,
@@ -67,6 +66,7 @@ export class TenantAdminManager {
                 body: tenantAdmin
             }, (error, response, body) => {
                 winston.info('retrieving tenant data...')
+                winston.debug('response: '+ JSON.stringify(response));
                 if (error || (response.statusCode != 200)) {
                     winston.error('error regTenantUserUrl: ' + JSON.stringify(error));
                     reject(error);

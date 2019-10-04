@@ -92,6 +92,7 @@ export const createUserSystem: Handler = (event, _context, callback) => {
                 configuration.userRole.systemUser,
                 (err, result) => {
                     if (err) {
+                      
                         createCallbackResponse(400, "Error provisioning system admin user", callback);
 
                     } else {
@@ -114,9 +115,10 @@ export const createUserTenant: Handler = (event, _context, callback) => {
         if (systemCredentials) {
             // provision the tenant admin and roles
             provisionAdminUserWithRoles(user, systemCredentials, configuration.userRole.tenantAdmin,
-                configuration.userRole.tenantAdmin,
+                configuration.userRole.tenantUser,
                 (err, result) => {
                     if (err) {
+                        winston.debug('Error provisioning tenant admin user: '+JSON.stringify(err));
                         createCallbackResponse(400, "Error provisioning tenant admin user", callback);
                     } else {
                         createCallbackResponse(200, result, callback);
@@ -222,7 +224,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
             winston.debug('tenant_id: ' + user.tenant_id);
             cognitoUsers.createUserPool(user.tenant_id)
                 .then((poolData) => {
-                    winston.debug('poolData: ' + poolData);
+                    winston.debug('poolData: ', poolData);
                     createdUserPoolData = poolData;
 
                     let clientConfigParams = {
@@ -375,7 +377,7 @@ export const provisionAdminUserWithRoles = (user, credentials, adminPolicyName, 
                         },
                         "addRoleToIdentity": identityRole
                     };
-                    winston.debug('returnObject', returnObject);
+                    winston.debug('returnObject ', returnObject);
                     callback(null, returnObject)
                 })
                 .catch((err) => {
@@ -422,7 +424,7 @@ const lookupUserPoolData = (credentials, userId, tenantId, isSystemContext, call
                 winston.error('Error getting user: ' + err);
                 callback(err);
             } else {
-                winston.debug('user data: ' + users);
+                winston.debug('user data: ' + JSON.stringify(users));
                 if (users.length == 0) {
                     let err = new Error('No user found: ' + userId);
                     callback(err);
