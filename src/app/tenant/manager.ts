@@ -39,8 +39,6 @@ export interface Tenant {
 export class TenantAdminManager {
 
     static reg(tenant: Tenant, configuration: SaasConfig): Promise<any> {
-
-
         return new Promise((resolve, reject) => {
             let regTenantUserUrl = configuration.url.user + '/reg';
 

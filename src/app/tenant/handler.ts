@@ -40,7 +40,6 @@ let tenantSchema = {
 
 export const createTenant: Handler = (event, _context, callback) => {
     let credentials: any = {};
-
     tokenManager.getSystemCredentials((systemCredentials) => {
         credentials = systemCredentials;
         let tenant = JSON.parse(event.body);
@@ -64,7 +63,6 @@ export const createTenant: Handler = (event, _context, callback) => {
         });
     })
 };
-
 
 export const ListTenantSystem: Handler = (_event, _context, callback) => {
     //context.callbackWaitsForEmptyEventLoop = false
@@ -96,7 +94,6 @@ export const ListTenantSystem: Handler = (_event, _context, callback) => {
     });
 };
 
-
 export const regTenant: Handler = (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false;
     let tenant: Tenant = JSON.parse(event.body);
@@ -123,6 +120,8 @@ export const regTenant: Handler = (event, context, callback) => {
 
                 tenant.systemAdminPolicy = tenData.policy.systemAdminPolicy;
                 tenant.systemSupportPolicy = tenData.policy.systemSupportPolicy;
+
+                winston.debug("saving tenant [REG]: " + tenant);
 
                 TenantAdminManager.saveTenantData(tenant, configuration).then(() => {
 
@@ -168,7 +167,7 @@ export const listTenant: Handler = (event, _context, callback) => {
     });
 };
 
-export const getTenant: Handler = (event: APIGatewayEvent, _conxtext, callback) => {
+export const getTenant: Handler = (event: APIGatewayEvent, _context, callback) => {
     winston.debug('Fetching tenant: ' + event.pathParameters.id);
 
     // init params structure with request params
