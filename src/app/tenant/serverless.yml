@@ -35,6 +35,7 @@ provider:
   stage: ${opt:stage, 'dev'}
   profile: default
   region: ${opt:region, 'us-east-1'}
+  timeout: 15
   apiKeys:
     - tenantApiKey
   iamRoleStatements:

@@ -33,7 +33,7 @@ export const getTenantId = (event): string => {
             tenantId = decodedIdToken['custom:tenant_id'];
     }
     return tenantId;
-}
+};
 
 export const getTokenId = (req): string => {
     let tenantId = '';
@@ -108,6 +108,7 @@ export const decodeOpenID = (bearerToken) => {
 };
 
 export const getCredentialsFromToken = (event, updateCredentials) => {
+    // implement elasticache to manage token
     tokenCache = {};
     let bearerToken = event.headers['Authorization'];
     winston.debug('Authorization: ' + JSON.stringify(bearerToken));
@@ -302,7 +303,7 @@ export const getId = (event, callback) => {
             /* '<IdentityProviderName>': ... */
         }
     };
-    winston.debug('getID params: ' + JSON.stringify(params))
+    winston.debug('getID params: ' + JSON.stringify(params));
     cognitoIdentity.getId(params, (err, data) => {
         if (err) {
             winston.debug(err.message, err.stack);
