@@ -172,7 +172,7 @@ export const createUserPool = (tenantId): Promise<any> => {
 
         let SnsArn = configuration.role.sns;
         //Invite Message:
-        let inviteMessage = '<img src="https://vonallem.la/assets/images/logo.svg" alt="Von Allem"> <br><br>Welcome to Future!. <br><br>Login to Smartly ERP System Administration. <br><br>Username: {username} <br><br>Password: {####}';
+        let inviteMessage = '<img src="https://vonallem.la/assets/images/logo.svg" alt="Von Allem" /> <br><br>Welcome to Future!. <br><br>Login to Smartly ERP System Administration. <br><br>Username: {username} <br><br>Password: {####}';
         let emailSubject = 'Smartly SAAS ERP';
         // init JSON structure with pool settings
         let params = {
@@ -426,9 +426,7 @@ export const getPolicyTemplate = (policyType, policyConfig) => {
         arnPrefix: arnPrefix,
         cognitoArn: cognitoArn,
         tenantTableArn: databaseArnPrefix + policyConfig.tenantTableName,
-        userTableArn: databaseArnPrefix + policyConfig.userTableName,
-        productTableArn: databaseArnPrefix + policyConfig.productTableName,
-        orderTableArn: databaseArnPrefix + policyConfig.orderTableName
+        userTableArn: databaseArnPrefix + policyConfig.userTableName
     };
 
     if (policyType === configuration.userRole.systemAdmin)
@@ -581,21 +579,6 @@ export const getSystemAdminPolicy = (policyParams) => {
                 "Resource": [policyParams.userTableArn, policyParams.userTableArn + '/*']
             },
             {
-                "Sid": "TenantSystemAdminOrderTable",
-                "Effect": "Allow",
-                "Action": ["dynamodb:*"],
-                "Resource": [policyParams.orderTableArn]
-            },
-            {
-                "Sid": "TenantSystemAdminProductTable",
-                "Effect": "Allow",
-                "Action": [
-                    "dynamodb:*",
-                    "dynamodb:DescribeTable"
-                ],
-                "Resource": [policyParams.productTableArn]
-            },
-            {
                 "Sid": "FullCognitoFederatedIdentityAccess",
                 "Effect": "Allow",
                 "Action": ["cognito-identity:*"],
@@ -647,34 +630,6 @@ export const getSystemUserPolicy = (policyParams) => {
 
                 ],
                 "Resource": [policyParams.userTableArn]
-            },
-            {
-                "Sid": "TenantSystemUserOrderTable",
-                "Effect": "Allow",
-                "Action": [
-                    "dynamodb:GetItem",
-                    "dynamodb:BatchGetItem",
-                    "dynamodb:Scan",
-                    "dynamodb:Query",
-                    "dynamodb:DescribeTable",
-                    "dynamodb:CreateTable"
-
-                ],
-                "Resource": [policyParams.orderTableArn]
-            },
-            {
-                "Sid": "TenantSystemUserProductTable",
-                "Effect": "Allow",
-                "Action": [
-                    "dynamodb:GetItem",
-                    "dynamodb:BatchGetItem",
-                    "dynamodb:Scan",
-                    "dynamodb:Query",
-                    "dynamodb:DescribeTable",
-                    "dynamodb:CreateTable"
-
-                ],
-                "Resource": [policyParams.productTableArn]
             },
             {
                 "Sid": "FullReadCognitoIdentityAccess",

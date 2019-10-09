@@ -183,3 +183,9 @@ functions:
           cors:
             origin: "*"
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+
+
+# create our resources with separate cloudFormation Templates
+resources:
+  # API Gateway Errors and CORS
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-auth-errors.yml)}

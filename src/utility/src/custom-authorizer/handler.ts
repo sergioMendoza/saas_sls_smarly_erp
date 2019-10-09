@@ -62,9 +62,17 @@ export const authorizer: CustomAuthorizerHandler = (event: CustomAuthorizerEvent
                     pems[key_id] = jwkToPem(jwk);
                 }
 
-                ValidateToken(pems, event, callback)
+                ValidateToken(pems, event, (err, authResponse) => {
+                    if (err) {
+                        console.log(err);
+                        callback(err);
+                    }else{
+                        callback(null, authResponse);
+                    }
+
+                })
             } else {
-                callback(new Error('error'));
+                callback(new Error('Unauthorized'));
             }
         });
 
