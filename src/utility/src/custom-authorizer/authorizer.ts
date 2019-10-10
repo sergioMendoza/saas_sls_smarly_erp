@@ -208,21 +208,21 @@ export const ValidateToken = (pems: { [key: string]: string }, event: CustomAuth
     console.log(iss);
     if (!decodedJwt) {
         console.log('Not a valid JWT token');
-        callback(new Error('Unauthorized'))
+        callback(new Error('Unauthorized'));
     }
 
 
     //Fail if token is not from your UserPool
     if (decodedJwt.payload.iss != iss) {
         console.log("invalid issuer");
-        callback(new Error("Unauthorized"))
+        callback(new Error("Unauthorized"));
 
     }
 
     //Reject the jwt if it's not an 'Access Token'
     if (decodedJwt.payload.token_use != 'id') {
         console.log("Not an access token");
-        callback(new Error("Unauthorized"))
+        callback(new Error("Unauthorized"));
     }
 
     //Get the kid from the token and retrieve corresponding PEM
