@@ -137,7 +137,6 @@ functions:
           path: tenants
           cors:
             origin: "*"
-          authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
   updateUser:
     handler: handler.updateUser
     events:

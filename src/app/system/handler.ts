@@ -3,6 +3,8 @@ import * as uuidV4 from 'uuid/v4';
 import * as configModule from '../common/config-manager/config';
 import * as winston from 'winston';
 import {TenantAdminManager, Tenant} from './manager';
+import {createCallbackResponse} from '../common/utils/response';
+
 
 
 const configuration: configModule.SaasConfig = configModule.configure(process.env.ENV);
@@ -55,20 +57,17 @@ export const regSystemAdmin: Handler = (event, context, callback) => {
                     TenantAdminManager.saveTenantData(tenant, configuration).then(() => {
 
                         winston.debug("System admin user registered: " + tenant.id);
-                        callback(null, {
-                            statusCode: 201,
-                            body: JSON.stringify({
-                                message: "System admin user " + tenant.id + " registered"
-                            })
-                        });
+                        createCallbackResponse(201,{
+                            message: "System admin user " + tenant.id + " registered"
+                        }, callback);
                     }).catch((error) => {
                         winston.error("Error saving tenant system data: " + error.message);
-                        callback(new Error("[400] Error saving tenant system data: " + error.message))
+                        createCallbackResponse(400, {error: "Error saving tenant system data: " + error.message}, callback);
 
                     })
                 }).catch((error) => {
                 winston.error("Error registering new system admin user: " + error.message);
-                callback(new Error("[400] Error registering system admin user: " + error.message))
+                createCallbackResponse(400, {error: "Error registering system admin user: " + error.message}, callback);
 
             })
         }
@@ -78,8 +77,9 @@ export const regSystemAdmin: Handler = (event, context, callback) => {
 /**
  * Delete all system infrastructure and tables.
  */
-export const delSystemAdmin: Handler = (_event, _context, callback) => {
-    const headers = {"Access-Control-Allow-Origin": "*"};
+export const delSystemAdmin: Handler = (_event, context, callback) => {
+    context.callbackWaitsForEmptyEventLoop = false;
+
     TenantAdminManager.deleteInfra(configuration, winston)
         .then(() => {
             winston.debug("Delete Infra");
@@ -88,16 +88,13 @@ export const delSystemAdmin: Handler = (_event, _context, callback) => {
         })
         .then(() => {
             winston.debug("System Infrastructure & Tables removed");
-            callback(null, {
-                statusCode: 200,
-                headers: headers,
-                body: JSON.stringify({
-                    message: "System Infrastructure & Tables removed"
-                })
-            })
+            createCallbackResponse(200, {
+                message: "System Infrastructure & Tables removed"
+            }, callback);
         })
-        .catch((_error) => {
+        .catch((error) => {
             winston.error("Error removing system");
-            callback(new Error("[400] Error removing system"))
+            winston.debug("Error: "+JSON.stringify(error));
+            createCallbackResponse(400, {eeror: "Error removing system"}, callback);
         });
 };

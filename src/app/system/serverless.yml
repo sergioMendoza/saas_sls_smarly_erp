@@ -34,6 +34,7 @@ provider:
   runtime: nodejs10.x
   stage: ${opt:stage, 'dev'}
   profile: default
+  timeout: 15
   region: ${opt:region, 'us-east-1'}
   apiKeys:
     - systemApiKey
@@ -84,6 +85,13 @@ functions:
           path: admin
           cors:
             origin: "*"
+    vpc:
+      securityGroupIds:
+        - "Fn::GetAtt": SaaSSecurityGroup.GroupId
+      subnetIds:
+        - Ref: PrivateSubnetA
+        - Ref: PrivateSubnetB
+        - Ref: PublicSubnetA
 
   delSystemAdmin:
     handler: handler.delSystemAdmin
@@ -93,47 +101,14 @@ functions:
           path: admin
           cors:
             origin: "*"
+    vpc:
+      securityGroupIds:
+        - "Fn::GetAtt": SaaSSecurityGroup.GroupId
+      subnetIds:
+        - Ref: PrivateSubnetA
+        - Ref: PrivateSubnetB
+        - Ref: PublicSubnetA
 
-  delUserTables:
-    handler: handler.delUserTables
-    events:
-      - http:
-          method: delete
-          path: tables
-          cors:
-            origin: "*"
-  delUser:
-    handler: handler.delUser
-    events:
-      - http:
-          method: delete
-          path: /{id}
-          cors:
-            origin: "*"
-  updateUser:
-    handler: handler.updateUser
-    events:
-      - http:
-          method: put
-          path: /
-          cors:
-            origin: "*"
-  disableUser:
-    handler: handler.disableUser
-    events:
-      - http:
-          method: put
-          path: disable
-          cors:
-            origin: "*"
-  enableUser:
-    handler: handler.enableUser
-    events:
-      - http:
-          method: put
-          path: enable
-          cors:
-            origin: "*"
 
 # create our resources with separate cloudFormation Templates
 resources:
@@ -150,3 +125,15 @@ resources:
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/roles.yml)}
   # API Gateway Errors and CORS
   # - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}
+
+  # VPC
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/vpc.yml)}
+  
+  # route tables and gateways
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/route-tables-gateway.yml)}
+
+  # groups
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/groups.yml)}
+
+  # elasticcache
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/elasticache.yml)}

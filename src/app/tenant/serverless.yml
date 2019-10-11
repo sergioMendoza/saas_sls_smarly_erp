@@ -54,6 +54,15 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "${self:custom.prefix.arn.table}/*"
+    - Effect: "Allow"
+      Action:
+        - iam:*
+        - s3:*
+        - cognito-idp:*
+        - cognito-sync:*
+        - cognito-identity:*
+        - sts:AssumeRole
+      Resource: "*"
 
   environment:
     PROJECT_NAME: ${self:custom.PROJECT_NAME}
@@ -127,10 +136,7 @@ functions:
           method: delete
           cors:
             origin: "*"
-#  hello:
-#    handler: handler.hello
-#    events:
-#      - http:
-#          method: get
-#          path: hello
-#          ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+  
+resources:
+  # API Gateway Errors and CORS
+  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-auth-errors.yml)}

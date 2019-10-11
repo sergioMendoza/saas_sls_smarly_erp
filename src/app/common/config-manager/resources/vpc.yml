@@ -1,0 +1,33 @@
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ${self:provider.region}a
+      CidrBlock: 10.0.1.0/24
+      VpcId:
+        Ref: Vpc
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ${self:provider.region}b
+      CidrBlock: 10.0.2.0/24
+      VpcId:
+        Ref: Vpc
+  PrivateSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ${self:provider.region}c
+      CidrBlock: 10.0.3.0/24
+      VpcId:
+        Ref: Vpc
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ${self:provider.region}a
+      CidrBlock: 10.0.21.0/24
+      VpcId:
+        Ref: Vpc

@@ -193,7 +193,7 @@ export const getUserPoolWithParams = (userName, callback) => {
 export const getInfra = (_input, callback) => {
     // Create URL for user-manager request
     // let userURL = userURL + '/system/' + userName;
-    let tenantsUrl = configuration.url.tenant + 's/system/';
+    let tenantsUrl = configuration.url.tenant + '/system/';
     console.log(tenantsUrl);
     request({
         url: tenantsUrl,

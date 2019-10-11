@@ -1,5 +1,5 @@
 import * as request from 'request';
-import {SaasConfig} from '../common/config-manager/config';
+import { SaasConfig } from '../common/config-manager/config';
 import * as winston from "winston";
 
 export interface TenantAdmin {
@@ -62,7 +62,7 @@ export class TenantAdminManager {
                 url: regTenantUserUrl,
                 method: "POST",
                 json: true,
-                headers: {"content-type": "application/json"},
+                headers: { "content-type": "application/json" },
                 body: tenantAdmin
             }, (error, response, body) => {
                 winston.info('retrieving tenant data...');
@@ -87,7 +87,7 @@ export class TenantAdminManager {
             url: userExistsUrl,
             method: "GET",
             json: true,
-            headers: {"content-type": "application/json"}
+            headers: { "content-type": "application/json" }
         }, (error, response, body) => {
             if (error) callback(false);
             else if ((response != null) && (response.statusCode == 400)) callback(false);
@@ -130,7 +130,7 @@ export class TenantAdminManager {
                 url: tenantURL,
                 method: "POST",
                 json: true,
-                headers: {"content-type": "application/json"},
+                headers: { "content-type": "application/json" },
                 body: tenantRequestData
             }, function (error, response, body) {
                 winston.info('responding...');
@@ -147,14 +147,17 @@ export class TenantAdminManager {
     }
 
     static deleteInfra(configuration: SaasConfig, winston): Promise<any> {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
             let deleteInfraUrl = configuration.url.user + '/tenants';
             // fire request
             request({
                 url: deleteInfraUrl,
                 method: "DELETE",
                 json: true,
-            }, function (error, response) {
+            }, (error, response) => {
+                winston.debug('response from deleteInfraUrl: ' + JSON.stringify(deleteInfraUrl));
+                winston.debug('response: ' + JSON.stringify(response));
+                winston.debug('error: ' + JSON.stringify(error))
                 if (error || (response.statusCode != 200)) {
                     reject(error);
                     winston.debug('Error Removing Infrastructure');
