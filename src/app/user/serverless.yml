@@ -87,6 +87,11 @@ functions:
           path: pool/{id}
           cors:
             origin: "*"
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   createUserSystem:
     handler: handler.createUserSystem
     events:
@@ -95,6 +100,11 @@ functions:
           path: system
           cors:
             origin: "*"
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   createUserTenant:
     handler: handler.createUserTenant
     events:
@@ -103,6 +113,11 @@ functions:
           path: reg
           cors:
             origin: "*"
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   createUser:
     handler: handler.createUser
     events:
@@ -112,6 +127,11 @@ functions:
           cors:
             origin: "*"
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   listUser:
     handler: handler.listUser
     events:
@@ -120,6 +140,11 @@ functions:
           method: get
           cors: true
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   getUser:
     handler: handler.getUser
     events:
@@ -129,6 +154,11 @@ functions:
           cors:
             origin: "*"
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   delUserTenants:
     handler: handler.delUserTenants
     events:
@@ -137,6 +167,11 @@ functions:
           path: tenants
           cors:
             origin: "*"
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   updateUser:
     handler: handler.updateUser
     events:
@@ -146,6 +181,11 @@ functions:
           cors:
             origin: "*"
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   enableUser:
     handler: handler.enableUser
     events:
@@ -155,6 +195,11 @@ functions:
           cors:
             origin: "*"
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   disableUser:
     handler: handler.disableUser
     events:
@@ -164,6 +209,11 @@ functions:
           cors:
             origin: "*"
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   delUser:
     handler: handler.delUser
     events:
@@ -173,6 +223,11 @@ functions:
           cors:
             origin: "*"
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   delUserTables:
     handler: handler.delUserTables
     events:
@@ -182,6 +237,11 @@ functions:
           cors:
             origin: "*"
           authorizer: ${self:custom.prefix.arn.lambda}:${self:custom.env.authorizer.${self:provider.stage}}
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
 
 
 # create our resources with separate cloudFormation Templates

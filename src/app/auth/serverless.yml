@@ -87,3 +87,9 @@ functions:
           path: /
           cors:
             origin: '*'
+    vpc:
+      securityGroupIds:
+        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+      subnetIds:
+        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
+
