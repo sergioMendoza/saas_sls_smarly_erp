@@ -32,8 +32,15 @@ custom:
 provider:
   name: aws
   runtime: nodejs10.x
+  vpc:
+    securityGroupIds:
+      - "Fn::GetAtt": SaaSSecurityGroup.GroupId
+    subnetIds:
+      - Ref: PrivateSubnetA
+      - Ref: PrivateSubnetB
+      - Ref: PublicSubnetA
   stage: ${opt:stage, 'dev'}
-  profile: default
+  profile: smarly
   timeout: 15
   region: ${opt:region, 'us-east-1'}
   apiKeys:
@@ -85,13 +92,6 @@ functions:
           path: admin
           cors:
             origin: "*"
-    vpc:
-      securityGroupIds:
-        - "Fn::GetAtt": SaaSSecurityGroup.GroupId
-      subnetIds:
-        - Ref: PrivateSubnetA
-        - Ref: PrivateSubnetB
-        - Ref: PublicSubnetA
 
   delSystemAdmin:
     handler: handler.delSystemAdmin
@@ -101,13 +101,6 @@ functions:
           path: admin
           cors:
             origin: "*"
-    vpc:
-      securityGroupIds:
-        - "Fn::GetAtt": SaaSSecurityGroup.GroupId
-      subnetIds:
-        - Ref: PrivateSubnetA
-        - Ref: PrivateSubnetB
-        - Ref: PublicSubnetA
 
 
 # create our resources with separate cloudFormation Templates
@@ -136,4 +129,4 @@ resources:
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/groups.yml)}
 
   # elasticcache
-  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/elasticache.yml)}
+  #- ${file(${self:custom.relativePathToCommon}/config-manager/resources/elasticache.yml)}

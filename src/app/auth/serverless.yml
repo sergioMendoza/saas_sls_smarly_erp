@@ -33,8 +33,13 @@ custom:
 provider:
   name: aws
   runtime: nodejs10.x
+  vpc:
+    securityGroupIds:
+      - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+    subnetIds:
+      ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   stage: ${opt:stage, 'dev'}
-  profile: default
+  profile: smarly
   region: ${opt:region, 'us-east-1'}
   apiKeys:
     - authApiKey
@@ -66,7 +71,6 @@ provider:
         - cognito-identity:*
       Resource: "*"
 
-
   environment:
     PROJECT_NAME: ${self:custom.PROJECT_NAME}
     SERVICE_URL: ${self:custom.env.serviceUrl.${self:provider.stage}}
@@ -87,9 +91,5 @@ functions:
           path: /
           cors:
             origin: '*'
-    vpc:
-      securityGroupIds:
-        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
-      subnetIds:
-        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
+
 

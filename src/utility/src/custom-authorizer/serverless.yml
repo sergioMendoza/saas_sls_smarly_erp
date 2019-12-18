@@ -10,7 +10,7 @@ provider:
   name: aws
   runtime: nodejs8.10
   stage: ${opt:stage, 'dev'}
-  profile: default
+  profile: smarly
   region: 'us-east-1'
   apiKeys:
     - mySecretAPIKey

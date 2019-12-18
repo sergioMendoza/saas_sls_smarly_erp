@@ -32,8 +32,13 @@ custom:
 provider:
   name: aws
   runtime: nodejs10.x
+  vpc:
+    securityGroupIds:
+      - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+    subnetIds:
+      ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   stage: ${opt:stage, 'dev'}
-  profile: default
+  profile: smarly
   region: ${opt:region, 'us-east-1'}
   timeout: 15
   apiKeys:
@@ -83,11 +88,6 @@ functions:
           path: reg
           cors:
             origin: "*"
-    vpc:
-      securityGroupIds:
-        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
-      subnetIds:
-        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
 
   getTenant:
     handler: handler.getTenant
@@ -97,11 +97,7 @@ functions:
           path: /{id}
           cors:
             origin: "*"
-    vpc:
-      securityGroupIds:
-        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
-      subnetIds:
-        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
+
   createTenant:
     handler: handler.createTenant
     events:
@@ -110,11 +106,7 @@ functions:
           path: /
           cors:
             origin: "*"
-    vpc:
-      securityGroupIds:
-        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
-      subnetIds:
-        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
+
   ListTenantSystem:
     handler: handler.ListTenantSystem
     events:
@@ -123,11 +115,7 @@ functions:
           path: system
           cors:
             origin: "*"
-    vpc:
-      securityGroupIds:
-        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
-      subnetIds:
-        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
+
   listTenant:
     handler: handler.listTenant
     events:
@@ -136,11 +124,7 @@ functions:
           method: get
           cors:
             origin: "*"
-    vpc:
-      securityGroupIds:
-        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
-      subnetIds:
-        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
+
   updateTenant:
     handler: handler.updateTenant
     events:
@@ -149,11 +133,6 @@ functions:
           method: put
           cors:
             origin: "*"
-    vpc:
-      securityGroupIds:
-        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
-      subnetIds:
-        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
 
   delTenant:
     handler: handler.delTenant
@@ -163,12 +142,7 @@ functions:
           method: delete
           cors:
             origin: "*"
-    vpc:
-      securityGroupIds:
-        - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
-      subnetIds:
-        ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
-  
+
 resources:
   # API Gateway Errors and CORS
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-auth-errors.yml)}
