@@ -7,7 +7,7 @@ import {createCallbackResponse} from '../common/utils/response';
 
 
 
-const configuration: configModule.SaasConfig = configModule.configure(process.env.ENV);
+const configuration: configModule.SaasConfig = configModule.configure(process.env.NODE_ENV);
 winston.configure({
     level: configuration.loglevel,
     transports: [

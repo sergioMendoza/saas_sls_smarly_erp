@@ -6,7 +6,7 @@ import * as AWS from 'aws-sdk';
 import * as configModule from '../config-manager/config';
 import * as winston from 'winston';
 
-const configuration = configModule.configure(process.env.ENV);
+const configuration = configModule.configure(process.env.NODE_ENV);
 
 winston.configure({
     level: configuration.loglevel,

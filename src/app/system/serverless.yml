@@ -31,14 +31,19 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs12.x
+#  vpc:
+#    securityGroupIds:
+#      - "Fn::GetAtt": SaaSSecurityGroup.GroupId
+#    subnetIds:
+#      - Ref: PrivateSubnetA
+#      - Ref: PrivateSubnetB
+#      - Ref: PublicSubnetA
   vpc:
     securityGroupIds:
-      - "Fn::GetAtt": SaaSSecurityGroup.GroupId
+      - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
     subnetIds:
-      - Ref: PrivateSubnetA
-      - Ref: PrivateSubnetB
-      - Ref: PublicSubnetA
+      ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   stage: ${opt:stage, 'dev'}
   profile: smarly
   timeout: 15
@@ -79,9 +84,14 @@ provider:
     REGION: ${self:provider.region}
     SNS_ROLE_ARN: ${self:custom.prefix.arn.sns}:${self:custom.env.snsTopic.${self:provider.stage}}
     AWS_ACCOUNT_ID: ${self:custom.env.accountId.${self:provider.stage}}
-    ENV: ${self:provider.stage}
+    NODE_ENV: ${self:provider.stage}
     USER_TABLE: ${self:custom.env.table.user.${self:provider.stage}}
     TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
+    DB_NAME: ${self:custom.env.database.${self:provider.stage}.name}
+    DB_USER: ${self:custom.env.database.${self:provider.stage}.user}
+    DB_PASSWORD: ${self:custom.env.database.${self:provider.stage}.password}
+    DB_HOST: ${self:custom.env.database.${self:provider.stage}.host}
+    DB_PORT: ${self:custom.env.database.${self:provider.stage}.port}
 
 functions:
   regSystemAdmin:
@@ -116,17 +126,18 @@ resources:
 
   # Roles
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/roles.yml)}
-  # API Gateway Errors and CORS
-  # - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}
 
-  # VPC
-  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/vpc.yml)}
-  
-  # route tables and gateways
-  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/route-tables-gateway.yml)}
+#  # API Gateway Errors and CORS
+#  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}
 
-  # groups
-  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/groups.yml)}
+#  # VPC
+#  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/vpc.yml)}
 
-  # elasticcache
-  #- ${file(${self:custom.relativePathToCommon}/config-manager/resources/elasticache.yml)}
+#  # route tables and gateways
+#  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/route-tables-gateway.yml)}
+
+#  # groups
+#  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/groups.yml)}
+
+#  # elasticcache
+#  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/elasticache.yml)}

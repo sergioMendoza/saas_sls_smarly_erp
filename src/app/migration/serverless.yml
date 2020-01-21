@@ -1,14 +1,12 @@
-service:
-  name: sls-saas-tenant
+service: migration
 
-# Add the serverless-webpack plugin
 plugins:
   - serverless-webpack
-  - serverless-pseudo-parameters
   - serverless-offline
   - serverless-stage-manager
-  - serverless-domain-manager
+#  - serverless-domain-manager
   - serverless-package-external
+  - serverless-pseudo-parameters
 
 custom:
   PROJECT_NAME: "sls-saas"
@@ -16,6 +14,13 @@ custom:
   packageExternal:
     external:
       - ${self:custom.relativePathToCommon}
+  webpack:
+    webpackConfig: webpack.config.js
+    includeModules:
+      forceInclude:
+        - pg
+        - pg-hstore
+    packager: npm
   stages:
     - dev
     - staging
@@ -24,7 +29,7 @@ custom:
   env: ${file(${self:custom.relativePathToCommon}/config-manager/env.yml)}
   prefix: ${file(${self:custom.relativePathToCommon}/config-manager/prefix.yml)}
   customDomain:
-    basePath: tenants
+    basePath: migration
     domainName: ${self:custom.env.serviceUrl.${self:provider.stage}}
     stage: ${self:provider.stage}
     createRoute53Record: true
@@ -39,11 +44,12 @@ provider:
       ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   stage: ${opt:stage, 'dev'}
   profile: smarly
-  region: ${opt:region, 'us-east-1'}
   timeout: 15
-  apiKeys:
-    - tenantApiKey
+  region: ${opt:region, 'us-east-1'}
+#  apiKeys:
+#    - systemApiKey
   iamRoleStatements:
+    # allow lambda invocation and request
     - Effect: "Allow"
       Action:
         - "lambda:InvoqueFunction"
@@ -58,7 +64,9 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "${self:custom.prefix.arn.table}/*"
+      Resource:
+        - "${self:custom.prefix.arn.table}/*"
+        - "${self:custom.prefix.arn.sns}:${self:custom.env.snsTopic.${self:provider.stage}}"
     - Effect: "Allow"
       Action:
         - iam:*
@@ -66,7 +74,6 @@ provider:
         - cognito-idp:*
         - cognito-sync:*
         - cognito-identity:*
-        - sts:AssumeRole
       Resource: "*"
 
   environment:
@@ -78,71 +85,13 @@ provider:
     NODE_ENV: ${self:provider.stage}
     USER_TABLE: ${self:custom.env.table.user.${self:provider.stage}}
     TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
+    DB_NAME: ${self:custom.env.database.${self:provider.stage}.name}
+    DB_USER: ${self:custom.env.database.${self:provider.stage}.user}
+    DB_PASSWORD: ${self:custom.env.database.${self:provider.stage}.password}
+    DB_HOST: ${self:custom.env.database.${self:provider.stage}.host}
+    DB_PORT: ${self:custom.env.database.${self:provider.stage}.port}
 
 functions:
-  regTenant:
-    handler: handler.regTenant
-    events:
-      - http:
-          method: post
-          path: reg
-          cors:
-            origin: "*"
+  executeMigration:
+    handler: handler.executeMigration
 
-  getTenant:
-    handler: handler.getTenant
-    events:
-      - http:
-          method: get
-          path: /{id}
-          cors:
-            origin: "*"
-
-  createTenant:
-    handler: handler.createTenant
-    events:
-      - http:
-          method: post
-          path: /
-          cors:
-            origin: "*"
-
-  ListTenantSystem:
-    handler: handler.ListTenantSystem
-    events:
-      - http:
-          method: get
-          path: system
-          cors:
-            origin: "*"
-
-  listTenant:
-    handler: handler.listTenant
-    events:
-      - http:
-          path: /
-          method: get
-          cors:
-            origin: "*"
-
-  updateTenant:
-    handler: handler.updateTenant
-    events:
-      - http:
-          path: /
-          method: put
-          cors:
-            origin: "*"
-
-  delTenant:
-    handler: handler.delTenant
-    events:
-      - http:
-          path: /{id}
-          method: delete
-          cors:
-            origin: "*"
-
-resources:
-  # API Gateway Errors and CORS
-  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-auth-errors.yml)}

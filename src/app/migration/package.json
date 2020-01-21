@@ -1,0 +1,37 @@
+{
+  "name": "sls-saas-migrations",
+  "version": "1.0.0",
+  "description": "Serverless functions to migrate db",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "dotenv": "^8.2.0",
+    "pg": "^7.15.1",
+    "pg-hstore": "^2.3.3",
+    "request": "^2.88.0",
+    "sequelize": "^5.21.3",
+    "umzug": "^2.2.0",
+    "uuid": "^3.3.3",
+    "winston": "^3.2.1",
+    "source-map-support": "^0.5.13"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.57",
+    "copy-webpack-plugin": "^5.1.1",
+    "serverless-domain-manager": "^3.3.0",
+    "serverless-offline": "^5.11.0",
+    "serverless-package-external": "^1.1.1",
+    "serverless-pseudo-parameters": "^2.4.0",
+    "serverless-stage-manager": "^1.0.5",
+    "serverless-webpack": "^5.3.1",
+    "ts-loader": "^4.2.0",
+    "typescript": "^2.9.2",
+    "webpack": "^4.5.0",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "author": "The serverless webpack authors (https://github.com/elastic-coders/serverless-webpack)",
+  "license": "MIT"
+}

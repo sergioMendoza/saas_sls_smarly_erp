@@ -9,7 +9,7 @@ import {TenantAdminManager, Tenant} from './manager';
 
 import * as winston from 'winston';
 
-const configuration: configModule.SaasConfig = configModule.configure(process.env.ENV);
+const configuration: configModule.SaasConfig = configModule.configure(process.env.NODE_ENV);
 winston.configure({
     level: configuration.loglevel,
     transports: [

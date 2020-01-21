@@ -6,24 +6,24 @@ Resources:
       GroupDescription: SecurityGroup for SaaS Functions
       VpcId:
         Ref: Vpc
-  SaaSStorageSecurityGroup:
-    DependsOn: Vpc
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Ingress for Redis Cluster
-      VpcId:
-        Ref: Vpc
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: "6379"
-          ToPort: "6379"
-          SourceSecurityGroupId:
-            Ref: SaaSSecurityGroup
-  SaaSCacheSubnetGroup:
-    Type: AWS::ElastiCache::SubnetGroup
-    Properties:
-      Description: "Cache Subnet Group"
-      SubnetIds:
-        - Ref: PrivateSubnetA
+#  SaaSStorageSecurityGroup:
+#    DependsOn: Vpc
+#    Type: AWS::EC2::SecurityGroup
+#    Properties:
+#      GroupDescription: Ingress for Redis Cluster
+#      VpcId:
+#        Ref: Vpc
+#      SecurityGroupIngress:
+#        - IpProtocol: tcp
+#          FromPort: "6379"
+#          ToPort: "6379"
+#          SourceSecurityGroupId:
+#            Ref: SaaSSecurityGroup
+#  SaaSCacheSubnetGroup:
+#    Type: AWS::ElastiCache::SubnetGroup
+#    Properties:
+#      Description: "Cache Subnet Group"
+#      SubnetIds:
+#        - Ref: PrivateSubnetA
   
   

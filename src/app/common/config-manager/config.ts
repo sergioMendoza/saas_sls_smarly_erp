@@ -80,8 +80,8 @@ const dev: SaasEnvironmentConfig = config.default.Config.dev;
 
 export const configure = (environment: string | null | undefined): SaasConfig => {
     if (environment === null || environment === undefined || environment === 'undefined') {
-        environment = process.env.ENV;
-        if (process.env.ENV == undefined) {
+        environment = process.env.NODE_ENV;
+        if (process.env.NODE_ENV == undefined) {
             environment = 'dev';
         }
     }
