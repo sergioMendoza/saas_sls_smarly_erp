@@ -8,7 +8,7 @@ import fetch from 'node-fetch';
 
 global['fetch'] = fetch;
 
-const configuration: configModule.SaasConfig = configModule.configure(process.env.NODE_ENV);
+const configuration: configModule.SaasConfig = configModule.configure(process.env.NODE_ENVI);
 winston.configure({
     level: configuration.loglevel,
     transports: [

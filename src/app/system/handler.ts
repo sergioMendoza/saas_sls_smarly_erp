@@ -6,8 +6,7 @@ import {TenantAdminManager, Tenant} from './manager';
 import {createCallbackResponse} from '../common/utils/response';
 
 
-
-const configuration: configModule.SaasConfig = configModule.configure(process.env.NODE_ENV);
+const configuration: configModule.SaasConfig = configModule.configure(process.env.NODE_ENVI);
 winston.configure({
     level: configuration.loglevel,
     transports: [
@@ -28,7 +27,9 @@ winston.configure({
 export const regSystemAdmin: Handler = (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false;
     winston.debug('event query: ' + JSON.stringify(event));
-    let tenant: Tenant = JSON.parse(event.body);
+    winston.debug('event query: ' + JSON.stringify(event));
+    let tenant: Tenant = JSON.parse(JSON.stringify(event));
+    // let tenant: Tenant = event.body;
     // Generate the tenant id for the system user
     tenant.id = 'SYSADMIN' + uuidV4();
     winston.debug('Creating system admin user, tenant id: ' + tenant.id);
@@ -39,11 +40,11 @@ export const regSystemAdmin: Handler = (event, context, callback) => {
             winston.error("Error registering new system admin user");
             callback(new Error("[400] Error registering new system admin user"))
         } else {
-            winston.info('registering tenant...');
+            // winston.info('registering tenant...');
             TenantAdminManager.reg(tenant, configuration)
                 .then((tenData) => {
-                    winston.info('saving tenant data...');
-                    winston.debug('tenant data: ' + JSON.stringify(tenData));
+                    // winston.info('saving tenant data...');
+                    // winston.debug('tenant data: ' + JSON.stringify(tenData));
                     tenant.UserPoolId = tenData.pool.UserPool.Id;
                     tenant.IdentityPoolId = tenData.identityPool.IdentityPoolId;
 

@@ -2,7 +2,7 @@ import * as AWS from 'aws-sdk';
 import * as configModule from '../config-manager/config';
 import * as winston from 'winston';
 
-const configuration = configModule.configure(process.env.NODE_ENV);
+const configuration = configModule.configure(process.env.NODE_ENVI);
 
 winston.configure({
     level: configuration.loglevel,
@@ -23,7 +23,7 @@ export default class DynamoDBManager {
 
     constructor(tableDefinition, _credentials, _configSettings, _callback?) {
         // winston.debug("Table definition db: " + JSON.stringify(tableDefinition));
-        winston.debug("credentials db: " + JSON.stringify(_credentials));
+        // winston.debug("credentials db: " + JSON.stringify(_credentials));
         // winston.debug("config settings db: " + JSON.stringify(_configSettings));
         this.tableDefinition = tableDefinition;
         this._tableExists = true;
@@ -84,6 +84,7 @@ export default class DynamoDBManager {
                     }
                 });
             } else
+                winston.debug("docClient tableExists: " + JSON.stringify(docClient));
                 callback(null, docClient);
         } catch (error) {
             callback(error);
@@ -91,12 +92,11 @@ export default class DynamoDBManager {
     }
 
     query(searchParameters, credentials, callback) {
-        winston.debug('search Parameters begin:', credentials);
+        // winston.debug('search Parameters begin:', credentials);
         this.getDynamoDBDocumentClient(credentials, (error, docClient) => {
-            let _searchParameters = searchParameters;
-            winston.debug('search query:', _searchParameters);
             if (!error) {
-                docClient.query(_searchParameters, (err, data) => {
+                docClient.query(searchParameters, (err, data) => {
+                    winston.debug('error query:', err);
                     if (err) {
                         winston.error('Unable to query. Error:', JSON.stringify(err, null, 2));
                         callback(err);

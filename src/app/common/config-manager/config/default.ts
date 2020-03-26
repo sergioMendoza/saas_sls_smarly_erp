@@ -2,7 +2,7 @@ export default {
   "Config": {
     "dev": {
       "protocol": "https://",
-      "domain": "dev-saas.vonallem.com",
+      "domain": "dev-api.smartlyerp.com",
       "region": "us-east-1",
       "aws_account": "",
       "role": {

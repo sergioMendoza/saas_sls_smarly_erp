@@ -80,11 +80,12 @@ const dev: SaasEnvironmentConfig = config.default.Config.dev;
 
 export const configure = (environment: string | null | undefined): SaasConfig => {
     if (environment === null || environment === undefined || environment === 'undefined') {
-        environment = process.env.NODE_ENV;
-        if (process.env.NODE_ENV == undefined) {
+        environment = process.env.NODE_ENVI;
+        if (process.env.NODE_ENVI == undefined) {
             environment = 'dev';
         }
     }
+
     switch (environment) {
         case 'prod':
             if (process.env.REGION == undefined ||
@@ -128,8 +129,6 @@ export const configure = (environment: string | null | undefined): SaasConfig =>
                 }
 
             }
-
-
         case "dev":
             let name = dev.name;
             let table = dev.table;

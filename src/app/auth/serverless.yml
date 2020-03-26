@@ -33,11 +33,11 @@ custom:
 provider:
   name: aws
   runtime: nodejs10.x
-  vpc:
-    securityGroupIds:
-      - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
-    subnetIds:
-      ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
+#  vpc:
+#    securityGroupIds:
+#      - ${self:custom.env.vpc.securityGroupId.${self:provider.stage}}
+#    subnetIds:
+#      ${self:custom.env.vpc.subnetIds.${self:provider.stage}}
   stage: ${opt:stage, 'dev'}
   profile: smarly
   region: ${opt:region, 'us-east-1'}
@@ -77,7 +77,7 @@ provider:
     REGION: ${self:provider.region}
     SNS_ROLE_ARN: ${self:custom.prefix.arn.sns}:${self:custom.env.snsTopic.${self:provider.stage}}
     AWS_ACCOUNT_ID: ${self:custom.env.accountId.${self:provider.stage}}
-    NODE_ENV: ${self:provider.stage}
+    NODE_ENVI: ${self:provider.stage}
     USER_TABLE: ${self:custom.env.table.user.${self:provider.stage}}
     TENANT_TABLE: ${self:custom.env.table.tenant.${self:provider.stage}}
 

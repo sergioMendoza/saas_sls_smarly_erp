@@ -2,6 +2,8 @@ import * as request from 'request';
 import { SaasConfig } from '../common/config-manager/config';
 import * as winston from "winston";
 
+const axios = require('axios').default;
+
 export interface TenantAdmin {
     tenant_id: string;
     email: string;
@@ -20,18 +22,18 @@ export interface Tenant {
     companyName: string,
     accountName: string,
     ownerName: string,
-    tier: string,
+    tier?: string,
     email: string,
-    status: string,
-    UserPoolId: string,
-    IdentityPoolId: string,
-    systemAdminRole: string,
-    systemSupportRole: string,
-    trustRole: string,
-    systemAdminPolicy: string,
-    systemSupportPolicy: string,
+    status?: string,
+    UserPoolId?: string,
+    IdentityPoolId?: string,
+    systemAdminRole?: string,
+    systemSupportRole?: string,
+    trustRole?: string,
+    systemAdminPolicy?: string,
+    systemSupportPolicy?: string,
     userName: string,
-    role: string,
+    role?: string,
     firstName: string,
     lastName: string
 }
@@ -40,41 +42,87 @@ export class TenantAdminManager {
 
     static reg(tenant: Tenant, configuration: SaasConfig): Promise<any> {
 
+        winston.info('configurations' + JSON.stringify(configuration));
+
         let regTenantUserUrl = configuration.url.user + '/system';
-        let tenantAdmin: TenantAdmin = {
+
+        let tenantAdmin = {
             "tenant_id": tenant.id,
             "companyName": tenant.companyName,
             "accountName": tenant.accountName,
             "ownerName": tenant.ownerName,
-            "tier": tenant.tier,
             "email": tenant.email,
             "userName": tenant.userName,
-            "role": tenant.role,
             "firstName": tenant.firstName,
             "lastName": tenant.lastName
         };
+
+
         return new Promise((resolve, reject) => {
             // User service REST API URL
             winston.debug('regTenantUserUrl: ' + regTenantUserUrl);
             winston.debug('tenant Admin: ' + JSON.stringify(tenantAdmin));
             // FIRE IN THE HOLE!!!
-            request({
-                url: regTenantUserUrl,
-                method: "POST",
-                json: true,
-                headers: { "content-type": "application/json" },
-                body: tenantAdmin
-            }, (error, response, body) => {
-                winston.info('retrieving tenant data...');
-                winston.debug('response: ' + JSON.stringify(response));
-                if (error || (response.statusCode != 200)) {
-                    winston.error('error regTenantUserUrl: ' + JSON.stringify(error));
+            // request({
+            //     url: regTenantUserUrl,
+            //     method: "POST",
+            //     json: true,
+            //     headers: { "content-type": "application/json" },
+            //     body: tenantAdmin
+            // }, (error, response, body) => {
+            //     winston.info('retrieving tenant data...');
+            //     winston.debug('response: ' + JSON.stringify(response));
+            //     if (error || (response.statusCode != 200)) {
+            //         winston.error('error regTenantUserUrl: ' + JSON.stringify(error));
+            //         reject(error);
+            //     } else {
+            //         winston.debug('regTenantUserUrl: ' + JSON.stringify(body));
+            //         resolve(body);
+            //     }
+            // });
+
+            axios.post('https://dev-api.smartlyerp.com/users/', tenantAdmin)
+                .then(function (response) {
+                    winston.info('retrieving tenant data...');
+                    winston.debug('response: ' + JSON.stringify(response));
+
+                    if (response.statusCode != 200) {
+                        winston.error('error statusCode != 200');
+
+                    } else {
+                        winston.debug('regTenantUserUrl: ' + JSON.stringify(response));
+                        resolve(response);
+                    }
+                })
+                .catch(function (error) {
+                    winston.error('error Post Tenant User: ' + JSON.stringify(error));
+
+                    if (error.response) {
+                        // The request was made and the server responded with a status code
+                        // that falls out of the range of 2xx
+                        // console.log(error.response.data);
+                        // console.log(error.response.status);
+                        // console.log(error.response.headers);
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                        // http.ClientRequest in node.js
+                        //console.log(error.request);
+                    } else {
+                        // Something happened in setting up the request that triggered an Error
+                        //console.log('Error', error.message);
+                    }
+                    console.log(error.config);
+
                     reject(error);
-                } else {
-                    winston.debug('regTenantUserUrl: ' + JSON.stringify(body));
-                    resolve(body);
-                }
-            });
+                });
+
+
+
+
+
+
+
         })
     }
 
@@ -89,6 +137,7 @@ export class TenantAdminManager {
             json: true,
             headers: { "content-type": "application/json" }
         }, (error, response, body) => {
+            winston.info('ERROR EXIST USER' + JSON.stringify(error));
             if (error) callback(false);
             else if ((response != null) && (response.statusCode == 400)) callback(false);
             else {

@@ -8,7 +8,7 @@ import * as Async from 'async';
 
 import * as winston from 'winston';
 
-const configuration: configModule.SaasConfig = configModule.configure(process.env.NODE_ENV);
+const configuration: configModule.SaasConfig = configModule.configure(process.env.NODE_ENVI);
 winston.configure({
     level: configuration.loglevel,
     transports: [
@@ -81,6 +81,8 @@ export const createUserSystem: Handler = (event, _context, callback) => {
     user.tier = configuration.tier.system;
     user.role = configuration.userRole.systemAdmin;
     let credentials = {};
+
+    winston.info('user parameter request: ' + JSON.stringify(user));
 
     tokenManager.getSystemCredentials((systemCredentials) => {
         if (systemCredentials) {

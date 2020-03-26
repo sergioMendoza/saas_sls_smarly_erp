@@ -4,7 +4,7 @@ import * as winston from 'winston';
 // Configure Environment
 import * as configModule from '../common/config-manager/config';
 
-const configuration: configModule.SaasConfig = configModule.configure(process.env.NODE_ENV);
+const configuration: configModule.SaasConfig = configModule.configure(process.env.NODE_ENVI);
 
 // Init the winston
 
