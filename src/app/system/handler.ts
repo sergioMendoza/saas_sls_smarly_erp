@@ -26,10 +26,7 @@ winston.configure({
  */
 export const regSystemAdmin: Handler = (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false;
-    winston.debug('event query: ' + JSON.stringify(event));
-    winston.debug('event query: ' + JSON.stringify(event));
-    let tenant: Tenant = JSON.parse(JSON.stringify(event));
-    // let tenant: Tenant = event.body;
+    let tenant: Tenant = JSON.parse(event.body);
     // Generate the tenant id for the system user
     tenant.id = 'SYSADMIN' + uuidV4();
     winston.debug('Creating system admin user, tenant id: ' + tenant.id);

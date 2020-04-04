@@ -2,7 +2,6 @@ import * as request from 'request';
 import { SaasConfig } from '../common/config-manager/config';
 import * as winston from "winston";
 
-const axios = require('axios').default;
 
 export interface TenantAdmin {
     tenant_id: string;
@@ -63,65 +62,23 @@ export class TenantAdminManager {
             winston.debug('regTenantUserUrl: ' + regTenantUserUrl);
             winston.debug('tenant Admin: ' + JSON.stringify(tenantAdmin));
             // FIRE IN THE HOLE!!!
-            // request({
-            //     url: regTenantUserUrl,
-            //     method: "POST",
-            //     json: true,
-            //     headers: { "content-type": "application/json" },
-            //     body: tenantAdmin
-            // }, (error, response, body) => {
-            //     winston.info('retrieving tenant data...');
-            //     winston.debug('response: ' + JSON.stringify(response));
-            //     if (error || (response.statusCode != 200)) {
-            //         winston.error('error regTenantUserUrl: ' + JSON.stringify(error));
-            //         reject(error);
-            //     } else {
-            //         winston.debug('regTenantUserUrl: ' + JSON.stringify(body));
-            //         resolve(body);
-            //     }
-            // });
-
-            axios.post('https://dev-api.smartlyerp.com/users/', tenantAdmin)
-                .then(function (response) {
-                    winston.info('retrieving tenant data...');
-                    winston.debug('response: ' + JSON.stringify(response));
-
-                    if (response.statusCode != 200) {
-                        winston.error('error statusCode != 200');
-
-                    } else {
-                        winston.debug('regTenantUserUrl: ' + JSON.stringify(response));
-                        resolve(response);
-                    }
-                })
-                .catch(function (error) {
-                    winston.error('error Post Tenant User: ' + JSON.stringify(error));
-
-                    if (error.response) {
-                        // The request was made and the server responded with a status code
-                        // that falls out of the range of 2xx
-                        // console.log(error.response.data);
-                        // console.log(error.response.status);
-                        // console.log(error.response.headers);
-                    } else if (error.request) {
-                        // The request was made but no response was received
-                        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-                        // http.ClientRequest in node.js
-                        //console.log(error.request);
-                    } else {
-                        // Something happened in setting up the request that triggered an Error
-                        //console.log('Error', error.message);
-                    }
-                    console.log(error.config);
-
+            request({
+                url: regTenantUserUrl,
+                method: "POST",
+                json: true,
+                headers: { "content-type": "application/json" },
+                body: tenantAdmin
+            }, (error, response, body) => {
+                winston.info('retrieving tenant data...');
+                winston.debug('response: ' + JSON.stringify(response));
+                if (error || (response.statusCode != 200)) {
+                    winston.error('error regTenantUserUrl: ' + JSON.stringify(error));
                     reject(error);
-                });
-
-
-
-
-
-
+                } else {
+                    winston.debug('regTenantUserUrl: ' + JSON.stringify(body));
+                    resolve(body);
+                }
+            });
 
         })
     }
@@ -206,7 +163,7 @@ export class TenantAdminManager {
             }, (error, response) => {
                 winston.debug('response from deleteInfraUrl: ' + JSON.stringify(deleteInfraUrl));
                 winston.debug('response: ' + JSON.stringify(response));
-                winston.debug('error: ' + JSON.stringify(error))
+                winston.debug('error: ' + JSON.stringify(error));
                 if (error || (response.statusCode != 200)) {
                     reject(error);
                     winston.debug('Error Removing Infrastructure');

@@ -127,8 +127,8 @@ resources:
   # Roles
   - ${file(${self:custom.relativePathToCommon}/config-manager/resources/roles.yml)}
 
-#  # API Gateway Errors and CORS
-  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}
+##  # API Gateway Errors and CORS
+#  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/api-gateway-errors.yml)}
 
 #  # VPC
 #  - ${file(${self:custom.relativePathToCommon}/config-manager/resources/vpc.yml)}

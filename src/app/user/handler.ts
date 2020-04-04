@@ -433,7 +433,7 @@ const getUserPoolIdFromRequest = (event) => {
  * Create a new user using the supplied credentials/user
  * @param credentials used for the user creation
  * @param userPoolId The user pool where the user will be added
- * @param identityPoolId the identityPoolId
+ * @param identityPoolId the IdentityPoolId
  * @param clientId The client identifier
  * @param tenantId The tenant identifier
  * @param newUser The data fro the user being created
@@ -441,11 +441,9 @@ const getUserPoolIdFromRequest = (event) => {
 const createNewUser = (credentials, userPoolId, identityPoolId, clientId, tenantId, newUser): Promise<any> => {
     return new Promise((resolve, reject) => {
         // fill in system attributes for user (not passed in POST)
-        newUser.userPoolId = userPoolId;
         newUser.tenant_id = tenantId;
-        //newUser.email = newUser.userName;
         // create the user in Cognito
-
+        newUser.userPoolId = userPoolId;
         winston.debug('create new user', newUser);
 
         cognitoUsers.createUser(credentials, newUser, (err, cognitoUser) => {

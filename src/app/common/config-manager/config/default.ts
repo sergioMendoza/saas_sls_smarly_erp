@@ -2,7 +2,7 @@ export default {
   "Config": {
     "dev": {
       "protocol": "https://",
-      "domain": "dev-api.smartlyerp.com",
+      "domain": "dev-api.smarlyerp.com",
       "region": "us-east-1",
       "aws_account": "",
       "role": {

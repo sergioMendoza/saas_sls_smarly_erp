@@ -44,10 +44,11 @@ export const createUser = (credentials, user, callback) => {
         // ,
         // MessageAction: 'SUPPRESS',
         // TemporaryPassword: tempPassword,
-        UserAttributes: [{
-            Name: 'email',
-            Value: user.email
-        },
+        UserAttributes: [
+            {
+                Name: 'email',
+                Value: user.email
+            },
             {
                 Name: 'custom:tenant_id',
                 Value: user.tenant_id

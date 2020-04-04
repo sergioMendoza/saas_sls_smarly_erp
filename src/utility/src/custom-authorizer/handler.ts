@@ -1,18 +1,7 @@
-import {APIGatewayProxyHandler, Callback, Context, CustomAuthorizerEvent, CustomAuthorizerHandler} from 'aws-lambda';
+import {Callback, Context, CustomAuthorizerEvent, CustomAuthorizerHandler} from 'aws-lambda';
 import {decodeToken, ValidateToken} from './authorizer';
 import * as request from 'request';
 import jwkToPem, {Jwk} from 'jwk-to-pem';
-
-
-export const hello: APIGatewayProxyHandler = async (event, _context) => {
-    return {
-        statusCode: 200,
-        body: JSON.stringify({
-            message: 'Go Serverless Webpack (Typescript) v1.0! Your function executed successfully!',
-            input: event,
-        }),
-    };
-};
 
 export const authorizer: CustomAuthorizerHandler = (event: CustomAuthorizerEvent, _context: Context, callback: Callback) => {
     let token: string = event.authorizationToken;
@@ -43,7 +32,7 @@ export const authorizer: CustomAuthorizerHandler = (event: CustomAuthorizerEvent
         //let result: string = iss.substring(c1 - 9);
         //let aws_region: string = result.substring(0, result.indexOf('_'));
 
-        //let userPoolId: string = result;
+        //let UserPoolId: string = result;
         //let region: string = aws_region;
 
         request({

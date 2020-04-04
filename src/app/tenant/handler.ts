@@ -96,6 +96,7 @@ export const ListTenantSystem: Handler = (_event, _context, callback) => {
 
 export const regTenant: Handler = (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false;
+    winston.info(event);
     let tenant: Tenant = JSON.parse(event.body);
     // Generate the tenant id
     tenant.id = 'TENANT' + uuidV4();
@@ -127,7 +128,8 @@ export const regTenant: Handler = (event, context, callback) => {
 
                     winston.debug("Tenant registered: " + tenant.id);
                     createCallbackResponse(200, {
-                        message: "Tenant " + tenant.id + " registered"
+                        message: "Tenant " + tenant.id + " registered",
+                        tenant_id: tenant.id
                     }, callback);
                 }).catch((error) => {
                     winston.error("Error registering new tenant: " + JSON.stringify(error));

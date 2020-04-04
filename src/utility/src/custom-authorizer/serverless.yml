@@ -16,12 +16,5 @@ provider:
     - mySecretAPIKey
 
 functions:
-  hello:
-    handler: handler.hello
-    events:
-      - http:
-          method: get
-          path: hello
-          authorizer: authorizer
   authorizer:
     handler: handler.authorizer
